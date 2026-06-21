@@ -1,12 +1,12 @@
 # Nexora Language Installer
-# Usage: irm https://raw.githubusercontent.com/nexora-lang/nexora/main/install.ps1 | iex
-# Alt:   irm https://nexora.dev/install.ps1 | iex (if server is configured)
-# Or:    irm https://raw.githubusercontent.com/nexora-lang/nexora/main/install.ps1 | iex
+# Usage: irm https://raw.githubusercontent.com/x9suk/nexora/main/install.ps1 | iex
 
 $ErrorActionPreference = "Stop"
 
 # Config
-$VERSION = "1.0.0"
+$VERSION = "0.4.0"
+$GITHUB_USER = "x9suk"
+$REPO = "nexora"
 $INSTALL_DIR = "$env:USERPROFILE\.nexora"
 $BIN_DIR = "$INSTALL_DIR\bin"
 
@@ -36,9 +36,8 @@ Write-Host "[3/4] Downloading Nexora v$VERSION..." -ForegroundColor Yellow
 
 # Try GitHub releases first, then fallback to direct
 $urls = @(
-    "https://github.com/nexora-lang/nexora/releases/download/v$VERSION/nexora-$os-$arch.zip",
-    "https://github.com/nexora-lang/nexora/releases/download/v$VERSION/nexora-$os-$arch.tar.gz",
-    "https://nexora.dev/download/$os/$arch/nexora.zip"
+    "https://github.com/$GITHUB_USER/$REPO/releases/download/v$VERSION/nexora-$os-$arch.zip",
+    "https://github.com/$GITHUB_USER/$REPO/releases/download/v$VERSION/nexora-$os-$arch.tar.gz"
 )
 
 $downloaded = $false

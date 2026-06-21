@@ -1,10 +1,12 @@
 #!/bin/sh
 # Nexora Language Installer
-# Usage: curl -fsSL https://nexora.dev/install.sh | sh
+# Usage: curl -fsSL https://raw.githubusercontent.com/x9suk/nexora/main/install.sh | sh
 
 set -e
 
-VERSION="1.0.0"
+VERSION="0.4.0"
+GITHUB_USER="x9suk"
+REPO="nexora"
 INSTALL_DIR="$HOME/.nexora"
 BIN_DIR="$INSTALL_DIR/bin"
 
@@ -38,9 +40,8 @@ echo "  OS: $OS | Arch: $ARCH"
 echo "[3/4] Downloading Nexora v$VERSION..."
 
 URLS="
-https://github.com/nexora-lang/nexora/releases/download/v$VERSION/nexora-$OS-$ARCH.tar.gz
-https://github.com/nexora-lang/nexora/releases/download/v$VERSION/nexora-$OS-$ARCH.zip
-https://nexora.dev/download/$OS/$ARCH/nexora.tar.gz
+https://github.com/$GITHUB_USER/$REPO/releases/download/v$VERSION/nexora-$OS-$ARCH.tar.gz
+https://github.com/$GITHUB_USER/$REPO/releases/download/v$VERSION/nexora-$OS-$ARCH.zip
 "
 
 DOWNLOADED=false
