@@ -1,0 +1,270 @@
+// discord-nx: Moderation Bot Example
+// Auto-moderation, warnings, bans, and mute
+
+import { Client, Embed, Events, Permissions, Intents } from "../src/index.nx"
+
+let client = new Client({
+  token: process.env.DISCORD_TOKEN,
+  intents: Intents.GUILDS | Intents.GUILD_MESSAGES | Intents.GUILD_MEMBERS | Intents.GUILD_BANS,
+})
+
+// Store warnings in memory (use database in production)
+let warnings = {}
+
+client.on(Events.READY, (data) => {
+  console.log("[ModBot] Logged in as " + data.user.username)
+  console.log("[ModBot] Moderation features active")
+})
+
+// Auto-mod: Check for forbidden words
+let forbiddenWords = ["spam", "scam", "hack", "cheat"]
+
+client.on(Events.MESSAGE_CREATE, async (message) => {
+  if (message.author.bot) return
+
+  let content = message.content.toLowerCase()
+  let channelId = message.channel_id
+
+  // Check for forbidden words
+  for (let word of forbiddenWords) {
+    if (content.includes(word)) {
+      await client.deleteMessage(channelId, message.id)
+      await client.sendMessage(channelId, "⚠️ Message deleted: Forbidden word detected")
+      await warnUser(message.guild_id, message.author.id, message.author.username, "Forbidden word: " + word)
+      return
+    }
+  }
+
+  // Warn command
+  if (content.startsWith("!warn ")) {
+    let args = content.slice(6).split(" ")
+    let userId = args[0].replace(/[<@!>]/g, "")
+    let reason = args.slice(1).join(" ") || "No reason provided"
+
+    // Check permissions
+    let member = await client.getGuildMember(message.guild_id, message.author.id)
+    if (!hasPermission(member.roles, Permissions.KICK_MEMBERS)) {
+      await client.sendMessage(channelId, "❌ You don't have permission to warn users")
+      return
+    }
+
+    await warnUser(message.guild_id, userId, message.author.username, reason)
+
+    let embed = new Embed()
+      .setTitle("⚠️ User Warned")
+      .setColor(0xff9900)
+      .addField("User", "<@" + userId + ">", true)
+      .addField("Moderator", message.author.username, true)
+      .addField("Reason", reason)
+      .setTimestamp()
+
+    await client.sendMessage(channelId, "", { embed: embed })
+  }
+
+  // Kick command
+  if (content.startsWith("!kick ")) {
+    let args = content.slice(6).split(" ")
+    let userId = args[0].replace(/[<@!>]/g, "")
+    let reason = args.slice(1).join(" ") || "No reason provided"
+
+    let member = await client.getGuildMember(message.guild_id, message.author.id)
+    if (!hasPermission(member.roles, Permissions.KICK_MEMBERS)) {
+      await client.sendMessage(channelId, "❌ You don't have permission to kick users")
+      return
+    }
+
+    try {
+      await client.removeGuildMember(message.guild_id, userId)
+
+      let embed = new Embed()
+        .setTitle("👢 User Kicked")
+        .setColor(0xff6600)
+        .addField("User", "<@" + userId + ">", true)
+        .addField("Moderator", message.author.username, true)
+        .addField("Reason", reason)
+        .setTimestamp()
+
+      await client.sendMessage(channelId, "", { embed: embed })
+    } catch (err) {
+      await client.sendMessage(channelId, "❌ Failed to kick user: " + err.message)
+    }
+  }
+
+  // Ban command
+  if (content.startsWith("!ban ")) {
+    let args = content.slice(5).split(" ")
+    let userId = args[0].replace(/[<@!>]/g, "")
+    let reason = args.slice(1).join(" ") || "No reason provided"
+
+    let member = await client.getGuildMember(message.guild_id, message.author.id)
+    if (!hasPermission(member.roles, Permissions.BAN_MEMBERS)) {
+      await client.sendMessage(channelId, "❌ You don't have permission to ban users")
+      return
+    }
+
+    try {
+      await client.rest.put("/guilds/" + message.guild_id + "/bans/" + userId, {
+        reason: reason,
+      })
+
+      let embed = new Embed()
+        .setTitle("🔨 User Banned")
+        .setColor(0xff0000)
+        .addField("User", "<@" + userId + ">", true)
+        .addField("Moderator", message.author.username, true)
+        .addField("Reason", reason)
+        .setTimestamp()
+
+      await client.sendMessage(channelId, "", { embed: embed })
+    } catch (err) {
+      await client.sendMessage(channelId, "❌ Failed to ban user: " + err.message)
+    }
+  }
+
+  // Unban command
+  if (content.startsWith("!unban ")) {
+    let args = content.slice(7).split(" ")
+    let userId = args[0]
+
+    let member = await client.getGuildMember(message.guild_id, message.author.id)
+    if (!hasPermission(member.roles, Permissions.BAN_MEMBERS)) {
+      await client.sendMessage(channelId, "❌ You don't have permission to unban users")
+      return
+    }
+
+    try {
+      await client.rest.delete("/guilds/" + message.guild_id + "/bans/" + userId)
+
+      let embed = new Embed()
+        .setTitle("🔓 User Unbanned")
+        .setColor(0x00ff00)
+        .addField("User", userId, true)
+        .addField("Moderator", message.author.username, true)
+        .setTimestamp()
+
+      await client.sendMessage(channelId, "", { embed: embed })
+    } catch (err) {
+      await client.sendMessage(channelId, "❌ Failed to unban user: " + err.message)
+    }
+  }
+
+  // Mute command
+  if (content.startsWith("!mute ")) {
+    let args = content.slice(6).split(" ")
+    let userId = args[0].replace(/[<@!>]/g, "")
+    let duration = parseInt(args[1]) || 10 // Default 10 minutes
+
+    let member = await client.getGuildMember(message.guild_id, message.author.id)
+    if (!hasPermission(member.roles, Permissions.MUTE_MEMBERS)) {
+      await client.sendMessage(channelId, "❌ You don't have permission to mute users")
+      return
+    }
+
+    try {
+      // Create timeout (Discord API timeout)
+      let timeoutUntil = new Date(Date.now() + duration * 60 * 1000).toISOString()
+      await client.modifyGuildMember(message.guild_id, userId, {
+        communication_disabled_until: timeoutUntil,
+      })
+
+      let embed = new Embed()
+        .setTitle("🔇 User Muted")
+        .setColor(0x9900ff)
+        .addField("User", "<@" + userId + ">", true)
+        .addField("Duration", duration + " minutes", true)
+        .addField("Moderator", message.author.username, true)
+        .setTimestamp()
+
+      await client.sendMessage(channelId, "", { embed: embed })
+    } catch (err) {
+      await client.sendMessage(channelId, "❌ Failed to mute user: " + err.message)
+    }
+  }
+
+  // Unmute command
+  if (content.startsWith("!unmute ")) {
+    let userId = content.slice(8).replace(/[<@!>]/g, "")
+
+    let member = await client.getGuildMember(message.guild_id, message.author.id)
+    if (!hasPermission(member.roles, Permissions.MUTE_MEMBERS)) {
+      await client.sendMessage(channelId, "❌ You don't have permission to unmute users")
+      return
+    }
+
+    try {
+      await client.modifyGuildMember(message.guild_id, userId, {
+        communication_disabled_until: null,
+      })
+
+      let embed = new Embed()
+        .setTitle("🔊 User Unmuted")
+        .setColor(0x00ff00)
+        .addField("User", "<@" + userId + ">", true)
+        .addField("Moderator", message.author.username, true)
+        .setTimestamp()
+
+      await client.sendMessage(channelId, "", { embed: embed })
+    } catch (err) {
+      await client.sendMessage(channelId, "❌ Failed to unmute user: " + err.message)
+    }
+  }
+
+  // Warnings command
+  if (content === "!warnings") {
+    let userWarnings = warnings[message.author.id] || []
+
+    let embed = new Embed()
+      .setTitle("⚠️ Your Warnings")
+      .setColor(0xff9900)
+      .setDescription(userWarnings.length === 0 ? "No warnings" : "")
+
+    for (let i = 0; i < userWarnings.length; i++) {
+      let w = userWarnings[i]
+      embed.addField "#" + (i + 1), w.reason + " (by " + w.moderator + ")"
+    }
+
+    await client.sendMessage(channelId, "", { embed: embed })
+  }
+
+  // Clear warnings command
+  if (content.startsWith("!clearwarnings ")) {
+    let userId = content.slice(15).replace(/[<@!>]/g, "")
+
+    let member = await client.getGuildMember(message.guild_id, message.author.id)
+    if (!hasPermission(member.roles, Permissions.ADMINISTRATOR)) {
+      await client.sendMessage(channelId, "❌ Only admins can clear warnings")
+      return
+    }
+
+    warnings[userId] = []
+    await client.sendMessage(channelId, "✅ Warnings cleared for <@" + userId + ">")
+  }
+})
+
+async function warnUser(guildId, userId, moderator, reason) {
+  if (!warnings[guildId]) warnings[guildId] = {}
+  if (!warnings[guildId][userId]) warnings[guildId][userId] = []
+
+  warnings[guildId][userId].push({
+    reason: reason,
+    moderator: moderator,
+    timestamp: new Date().toISOString(),
+  })
+
+  let count = warnings[guildId][userId].length
+
+  // Auto-ban after 5 warnings
+  if (count >= 5) {
+    try {
+      await client.rest.put("/guilds/" + guildId + "/bans/" + userId, {
+        reason: "Auto-ban: 5 warnings reached",
+      })
+    } catch (err) {}
+  }
+}
+
+function hasPermission(roles, permission) {
+  return roles.some(role => (role.permissions & permission) === permission)
+}
+
+await client.login()

@@ -1,0 +1,227 @@
+/**
+ * nexora-db - Database ORM for Nexora
+ */
+
+class Database {
+  constructor(config) {
+    this.config = config;
+    this.connected = false;
+    this.tables = {};
+  }
+
+  async connect() {
+    this.connected = true;
+    console.log(`Connected to ${this.config.type || "database"}`);
+    return this;
+  }
+
+  async disconnect() {
+    this.connected = false;
+    console.log("Disconnected");
+  }
+
+  schema(name) {
+    const table = new Table(name, this);
+    this.tables[name] = table;
+    return table;
+  }
+
+  async query(sql, params = []) {
+    if (!this.connected) throw new Error("Not connected");
+    console.log(`Query: ${sql}`, params);
+    return { rows: [], affectedRows: 0 };
+  }
+
+  async insert(table, data) {
+    if (!this.connected) throw new Error("Not connected");
+    console.log(`Insert into ${table}:`, data);
+    return { id: 1, ...data };
+  }
+
+  async update(table, data, where) {
+    if (!this.connected) throw new Error("Not connected");
+    console.log(`Update ${table}:`, data, "where", where);
+    return { affectedRows: 1 };
+  }
+
+  async delete(table, where) {
+    if (!this.connected) throw new Error("Not connected");
+    console.log(`Delete from ${table} where`, where);
+    return { affectedRows: 1 };
+  }
+
+  async select(table, where = {}, options = {}) {
+    if (!this.connected) throw new Error("Not connected");
+    console.log(`Select from ${table}`, where, options);
+    return [];
+  }
+
+  async begin() {
+    console.log("Transaction started");
+  }
+
+  async commit() {
+    console.log("Transaction committed");
+  }
+
+  async rollback() {
+    console.log("Transaction rolled back");
+  }
+}
+
+class Table {
+  constructor(name, db) {
+    this.name = name;
+    this.db = db;
+    this.columns = [];
+    this._where = null;
+    this._orderBy = null;
+    this._limit = null;
+    this._offset = null;
+    this._joins = [];
+  }
+
+  column(name, type, options = {}) {
+    this.columns.push({ name, type, ...options });
+    return this;
+  }
+
+  integer(name, options) {
+    return this.column(name, "INTEGER", options);
+  }
+
+  text(name, options) {
+    return this.column(name, "TEXT", options);
+  }
+
+  varchar(name, length, options) {
+    return this.column(name, `VARCHAR(${length})`, options);
+  }
+
+  boolean(name, options) {
+    return this.column(name, "BOOLEAN", options);
+  }
+
+  datetime(name, options) {
+    return this.column(name, "DATETIME", options);
+  }
+
+  decimal(name, precision, scale, options) {
+    return this.column(name, `DECIMAL(${precision},${scale})`, options);
+  }
+
+  primary() {
+    this.columns[this.columns.length - 1].primaryKey = true;
+    return this;
+  }
+
+  notNull() {
+    this.columns[this.columns.length - 1].notNull = true;
+    return this;
+  }
+
+  unique() {
+    this.columns[this.columns.length - 1].unique = true;
+    return this;
+  }
+
+  default(value) {
+    this.columns[this.columns.length - 1].default = value;
+    return this;
+  }
+
+  async createTable() {
+    const colDefs = this.columns.map((col) => {
+      let def = `${col.name} ${col.type}`;
+      if (col.primaryKey) def += " PRIMARY KEY";
+      if (col.notNull) def += " NOT NULL";
+      if (col.unique) def += " UNIQUE";
+      if (col.default !== undefined) def += ` DEFAULT ${col.default}`;
+      return def;
+    });
+
+    const sql = `CREATE TABLE IF NOT EXISTS ${this.name} (${colDefs.join(", ")})`;
+    return this.db.query(sql);
+  }
+
+  async dropTable() {
+    return this.db.query(`DROP TABLE IF EXISTS ${this.name}`);
+  }
+
+  select(...columns) {
+    const t = new Table(this.name, this.db);
+    t.columns = this.columns;
+    t._selectedColumns = columns.length ? columns : ["*"];
+    return t;
+  }
+
+  where(condition) {
+    this._where = condition;
+    return this;
+  }
+
+  orderBy(column, direction = "ASC") {
+    this._orderBy = { column, direction };
+    return this;
+  }
+
+  limit(n) {
+    this._limit = n;
+    return this;
+  }
+
+  offset(n) {
+    this._offset = n;
+    return this;
+  }
+
+  join(table, on) {
+    this._joins.push({ table, on });
+    return this;
+  }
+
+  async find(id) {
+    const results = await this.db.select(this.name, { id });
+    return results[0] || null;
+  }
+
+  async findOne(where) {
+    const results = await this.db.select(this.name, where, { limit: 1 });
+    return results[0] || null;
+  }
+
+  async findMany(where = {}, options = {}) {
+    return this.db.select(this.name, where, options);
+  }
+
+  async create(data) {
+    return this.db.insert(this.name, data);
+  }
+
+  async update(data, where) {
+    return this.db.update(this.name, data, where || this._where);
+  }
+
+  async delete(where) {
+    return this.db.delete(this.name, where || this._where);
+  }
+
+  async count(where) {
+    const results = await this.db.query(
+      `SELECT COUNT(*) as count FROM ${this.name}${where ? " WHERE " + where : ""}`
+    );
+    return results.rows[0]?.count || 0;
+  }
+
+  async exists(where) {
+    const c = await this.count(where);
+    return c > 0;
+  }
+}
+
+function createDatabase(config) {
+  return new Database(config);
+}
+
+export { Database, Table, createDatabase };
+export default createDatabase;

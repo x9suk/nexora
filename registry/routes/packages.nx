@@ -1,0 +1,185 @@
+import { Router, Request, Response } from 'express-nx';
+import { pool } from '../database/schema.nx';
+import { verifyToken } from './auth.nx';
+import redis from 'redis';
+
+const router = Router();
+const redisClient = redis.createClient();
+const CACHE_TTL = 3600;
+
+export const healthCheck = (req: Request, res: Response) => {
+  res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+};
+
+router.get('/', async (req: Request, res: Response) => {
+  try {
+    const cacheKey = 'packages:all';
+    const cached = await redisClient.get(cacheKey);
+    if (cached) return res.json(JSON.parse(cached));
+
+    const result = await pool.query(
+      'SELECT DISTINCT name, description, version, license, created_at FROM packages ORDER BY created_at DESC'
+    );
+    await redisClient.setex(cacheKey, CACHE_TTL, JSON.stringify(result.rows));
+    res.json(result.rows);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch packages' });
+  }
+});
+
+router.get('/search', async (req: Request, res: Response) => {
+  try {
+    const { q } = req.query;
+    if (!q) return res.status(400).json({ error: 'Query parameter required' });
+
+    const result = await pool.query(
+      `SELECT DISTINCT name, description, version, license FROM packages 
+       WHERE name ILIKE $1 OR description ILIKE $1 OR $2 = ANY(keywords) LIMIT 20`,
+      [`%${q}%`, q as string]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    res.status(500).json({ error: 'Search failed' });
+  }
+});
+
+router.get('/:name', async (req: Request, res: Response) => {
+  try {
+    const { name } = req.params;
+    const cacheKey = `package:${name}`;
+    const cached = await redisClient.get(cacheKey);
+    if (cached) return res.json(JSON.parse(cached));
+
+    const result = await pool.query(
+      `SELECT p.*, pv.version, pv.tarball_url, pv.sha256, pv.size, pv.dependencies, pv.created_at as version_created_at
+       FROM packages p
+       JOIN package_versions pv ON p.id = pv.package_id
+       WHERE p.name = $1`,
+      [name]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Package not found' });
+    }
+
+    await redisClient.setex(cacheKey, CACHE_TTL, JSON.stringify(result.rows[0]));
+    res.json(result.rows[0]);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch package' });
+  }
+});
+
+router.get('/:name/:version', async (req: Request, res: Response) => {
+  try {
+    const { name, version } = req.params;
+    const result = await pool.query(
+      `SELECT p.*, pv.version, pv.tarball_url, pv.sha256, pv.size, pv.dependencies
+       FROM packages p
+       JOIN package_versions pv ON p.id = pv.package_id
+       WHERE p.name = $1 AND pv.version = $2`,
+      [name, version]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Version not found' });
+    }
+    res.json(result.rows[0]);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch version' });
+  }
+});
+
+router.post('/', verifyToken, async (req: Request, res: Response) => {
+  try {
+    const { name, description, version, license, repository, keywords, tarball_url, sha256, dependencies } = req.body;
+
+    const packageResult = await pool.query(
+      `INSERT INTO packages (name, description, version, author_id, license, repository, keywords)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+      [name, description, version, req.user.id, license, repository, keywords]
+    );
+
+    await pool.query(
+      `INSERT INTO package_versions (package_id, version, tarball_url, sha256, dependencies)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [packageResult.rows[0].id, version, tarball_url, sha256, dependencies || {}]
+    );
+
+    await redisClient.del(`package:${name}`);
+    res.status(201).json({ message: 'Package created', packageId: packageResult.rows[0].id });
+  } catch (error) {
+    if (error.code === '23505') {
+      return res.status(409).json({ error: 'Package version already exists' });
+    }
+    res.status(500).json({ error: 'Failed to create package' });
+  }
+});
+
+router.put('/:name', verifyToken, async (req: Request, res: Response) => {
+  try {
+    const { name } = req.params;
+    const { version, tarball_url, sha256, dependencies } = req.body;
+
+    const packageResult = await pool.query(
+      'SELECT id FROM packages WHERE name = $1 AND author_id = $2',
+      [name, req.user.id]
+    );
+
+    if (packageResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Package not found or unauthorized' });
+    }
+
+    await pool.query(
+      `INSERT INTO package_versions (package_id, version, tarball_url, sha256, dependencies)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [packageResult.rows[0].id, version, tarball_url, sha256, dependencies || {}]
+    );
+
+    await pool.query(
+      'UPDATE packages SET version = $1, updated_at = CURRENT_TIMESTAMP WHERE name = $2',
+      [version, name]
+    );
+
+    await redisClient.del(`package:${name}`);
+    res.json({ message: 'Package updated' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update package' });
+  }
+});
+
+router.delete('/:name', verifyToken, async (req: Request, res: Response) => {
+  try {
+    const { name } = req.params;
+    const result = await pool.query(
+      'DELETE FROM packages WHERE name = $1 AND author_id = $2 RETURNING id',
+      [name, req.user.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Package not found or unauthorized' });
+    }
+
+    await redisClient.del(`package:${name}`);
+    res.json({ message: 'Package deleted' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete package' });
+  }
+});
+
+router.get('/user/:user', async (req: Request, res: Response) => {
+  try {
+    const { user } = req.params;
+    const result = await pool.query(
+      `SELECT p.name, p.description, p.version, p.created_at 
+       FROM packages p
+       JOIN users u ON p.author_id = u.id
+       WHERE u.username = $1`,
+      [user]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch user packages' });
+  }
+});
+
+export { router as packageRoutes };

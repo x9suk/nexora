@@ -1,0 +1,25 @@
+name: discord-nx CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Nexora
+        run: |
+          curl -sSf https://raw.githubusercontent.com/nexora-lang/nexora/main/install.sh | sh
+          echo "$HOME/.nexora/bin" >> $GITHUB_PATH
+      
+      - name: Run Tests
+        run: nexora run test/test.nx
+      
+      - name: Lint
+        run: nexora lint src/

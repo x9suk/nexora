@@ -1,0 +1,60 @@
+// Modules in Nexora
+
+// Importing modules
+import "math"
+import "strings"
+import "http"
+
+// Using imported modules
+let pi = math.PI
+print "Pi: " + str(pi)
+
+let text = "Hello World"
+let upper = strings.toUpperCase(text)
+print "Upper: " + upper
+
+// HTTP requests (simulated)
+try {
+    let response = http.get("https://api.example.com/data")
+    let data = response.json()
+    print "API Response: " + str(data)
+} catch (error) {
+    print "HTTP Error: " + error
+}
+
+// Import with alias
+import "os" as operatingSystem
+
+let platform = operatingSystem.platform()
+print "Platform: " + platform
+
+// Import specific functions
+from "utils" import { formatDate, parseNumber }
+
+let today = formatDate()
+print "Today: " + today
+
+// Exporting
+export func publicFunction() {
+    print "This function is exported"
+}
+
+export class PublicClass {
+    init() {
+        print "This class is exported"
+    }
+}
+
+// Module organization
+module MathUtils {
+    export func square(x) {
+        return x * x
+    }
+    
+    export func cube(x) {
+        return x * x * x
+    }
+}
+
+print "Square of 5: " + str(MathUtils.square(5))
+print "Cube of 5: " + str(MathUtils.cube(5))

@@ -1,0 +1,14 @@
+print "part1"
+let name: string = "Nexora"
+let version: int = 4
+let multiplier = 3
+let multiply = x => x * multiplier
+print "Closure test:", multiply(5)
+let counter = 0
+let increment = () => {
+    counter = counter + 1
+    return counter
+}
+print "Counter:", increment()
+print "Counter:", increment()
+print "Counter:", increment()

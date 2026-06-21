@@ -1,0 +1,13 @@
+// Variables in Nexora
+
+let name = "Ashish"
+let age = 20
+let pi = 3.14159
+let isAwesome = true
+let nothing = null
+
+print "Name: " + name
+print "Age: " + str(age)
+print "Pi: " + str(pi)
+print "Is Awesome: " + str(isAwesome)
+print "Nothing: " + str(nothing)

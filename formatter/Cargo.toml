@@ -1,0 +1,16 @@
+[package]
+name = "nxfmt"
+version = "0.1.0"
+edition = "2021"
+authors = ["Nexora Team"]
+description = "Nexora Code Formatter"
+license = "MIT"
+
+[[bin]]
+name = "nxfmt"
+path = "src/main.rs"
+
+[dependencies]
+nexora-compiler = { path = "../compiler" }
+clap = { version = "4.0", features = ["derive"] }
+colored = "2.0"

@@ -1,0 +1,314 @@
+// Nexora Collection Standard Library
+// Usage: import { sort, unique } from "collection"
+
+func sort(arr) {
+    return sort(arr)
+}
+
+func reverse(arr) {
+    return reverse(arr)
+}
+
+func unique(arr) {
+    return unique(arr)
+}
+
+func flatten(arr) {
+    return flatten(arr)
+}
+
+func range(start, end) {
+    return range(start, end)
+}
+
+func zip(arr1, arr2) {
+    return zip(arr1, arr2)
+}
+
+func keys(obj) {
+    return keys(obj)
+}
+
+func values(obj) {
+    return values(obj)
+}
+
+func entries(obj) {
+    return entries(obj)
+}
+
+func map(arr, fn) {
+    let result = []
+    for item in arr {
+        push(result, fn(item))
+    }
+    return result
+}
+
+func filter(arr, fn) {
+    let result = []
+    for item in arr {
+        if fn(item) {
+            push(result, item)
+        }
+    }
+    return result
+}
+
+func reduce(arr, fn, init) {
+    let acc = init
+    for item in arr {
+        acc = fn(acc, item)
+    }
+    return acc
+}
+
+func find(arr, fn) {
+    for item in arr {
+        if fn(item) {
+            return item
+        }
+    }
+    return null
+}
+
+func find_index(arr, fn) {
+    let i = 0
+    for item in arr {
+        if fn(item) {
+            return i
+        }
+        i = i + 1
+    }
+    return -1
+}
+
+func every(arr, fn) {
+    for item in arr {
+        if !fn(item) {
+            return false
+        }
+    }
+    return true
+}
+
+func some(arr, fn) {
+    for item in arr {
+        if fn(item) {
+            return true
+        }
+    }
+    return false
+}
+
+func includes(arr, val) {
+    for item in arr {
+        if item == val {
+            return true
+        }
+    }
+    return false
+}
+
+func index_of(arr, val) {
+    let i = 0
+    for item in arr {
+        if item == val {
+            return i
+        }
+        i = i + 1
+    }
+    return -1
+}
+
+func last_index_of(arr, val) {
+    let i = len(arr) - 1
+    while i >= 0 {
+        if arr[i] == val {
+            return i
+        }
+        i = i - 1
+    }
+    return -1
+}
+
+func fill(arr, val, start, end) {
+    if start == null {
+        start = 0
+    }
+    if end == null {
+        end = len(arr)
+    }
+    let i = start
+    while i < end {
+        arr[i] = val
+        i = i + 1
+    }
+    return arr
+}
+
+func slice(arr, start, end) {
+    return slice(arr, start, end)
+}
+
+func splice(arr, start, delete_count, ...) {
+    let result = []
+    let i = 0
+    while i < start {
+        push(result, arr[i])
+        i = i + 1
+    }
+    // Skip deleted items
+    i = start + delete_count
+    while i < len(arr) {
+        push(result, arr[i])
+        i = i + 1
+    }
+    return result
+}
+
+func concat(arr1, arr2) {
+    let result = []
+    for item in arr1 {
+        push(result, item)
+    }
+    for item in arr2 {
+        push(result, item)
+    }
+    return result
+}
+
+func flat_map(arr, fn) {
+    let result = []
+    for item in arr {
+        let mapped = fn(item)
+        if type_of(mapped) == "Array" {
+            for sub in mapped {
+                push(result, sub)
+            }
+        } else {
+            push(result, mapped)
+        }
+    }
+    return result
+}
+
+func group_by(arr, fn) {
+    let groups = {}
+    for item in arr {
+        let key = fn(item)
+        if !exists(groups, key) {
+            groups[key] = []
+        }
+        push(groups[key], item)
+    }
+    return groups
+}
+
+func count_by(arr, fn) {
+    let counts = {}
+    for item in arr {
+        let key = fn(item)
+        if !exists(counts, key) {
+            counts[key] = 0
+        }
+        counts[key] = counts[key] + 1
+    }
+    return counts
+}
+
+func partition(arr, fn) {
+    let pass = []
+    let fail = []
+    for item in arr {
+        if fn(item) {
+            push(pass, item)
+        } else {
+            push(fail, item)
+        }
+    }
+    return [pass, fail]
+}
+
+func shuffle(arr) {
+    let result = []
+    let remaining = []
+    for item in arr {
+        push(remaining, item)
+    }
+    while len(remaining) > 0 {
+        let i = int(random() * len(remaining))
+        push(result, remaining[i])
+        // Remove item
+        let new_remaining = []
+        let j = 0
+        for item in remaining {
+            if j != i {
+                push(new_remaining, item)
+            }
+            j = j + 1
+        }
+        remaining = new_remaining
+    }
+    return result
+}
+
+func sample(arr, n) {
+    let shuffled = shuffle(arr)
+    let result = []
+    let i = 0
+    while i < n && i < len(shuffled) {
+        push(result, shuffled[i])
+        i = i + 1
+    }
+    return result
+}
+
+func sum(arr) {
+    let total = 0
+    for item in arr {
+        total = total + item
+    }
+    return total
+}
+
+func product(arr) {
+    let total = 1
+    for item in arr {
+        total = total * item
+    }
+    return total
+}
+
+func min(arr) {
+    if len(arr) == 0 {
+        return null
+    }
+    let m = arr[0]
+    for item in arr {
+        if item < m {
+            m = item
+        }
+    }
+    return m
+}
+
+func max(arr) {
+    if len(arr) == 0 {
+        return null
+    }
+    let m = arr[0]
+    for item in arr {
+        if item > m {
+            m = item
+        }
+    }
+    return m
+}
+
+func average(arr) {
+    if len(arr) == 0 {
+        return 0
+    }
+    return sum(arr) / len(arr)
+}

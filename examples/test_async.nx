@@ -1,0 +1,7 @@
+// 10. Async function
+async func delayed_print(msg, ms) {
+    print "Starting:", msg
+    return msg
+}
+let result = await delayed_print("Hello!", 100)
+print "Async result:", result

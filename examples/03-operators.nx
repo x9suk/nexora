@@ -1,0 +1,42 @@
+// Operators in Nexora
+
+// Arithmetic operators
+let a = 10
+let b = 3
+
+print "Addition: " + str(a + b)
+print "Subtraction: " + str(a - b)
+print "Multiplication: " + str(a * b)
+print "Division: " + str(a / b)
+print "Modulo: " + str(a % b)
+print "Power: " + str(a ** b)
+
+// Comparison operators
+print "Equal: " + str(a == b)
+print "Not Equal: " + str(a != b)
+print "Greater: " + str(a > b)
+print "Less: " + str(a < b)
+print "Greater Equal: " + str(a >= b)
+print "Less Equal: " + str(a <= b)
+
+// Logical operators
+let x = true
+let y = false
+
+print "AND: " + str(x && y)
+print "OR: " + str(x || y)
+print "NOT: " + str(!x)
+
+// String concatenation
+let greeting = "Hello"
+let target = "World"
+print greeting + " " + target + "!"
+
+// Compound assignment
+let counter = 0
+counter += 5
+print "Counter: " + str(counter)
+counter -= 2
+print "Counter: " + str(counter)
+counter *= 3
+print "Counter: " + str(counter)

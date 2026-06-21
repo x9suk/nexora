@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexora - The Modern Programming Language</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="logo">
+        <img src="logo.svg" alt="Nexora">
+        Nexora
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html" class="active">Home</a></li>
+        <li><a href="docs.html">Documentation</a></li>
+        <li><a href="packages.html">Packages</a></li>
+        <li><a href="playground.html">Playground</a></li>
+      </ul>
+      <a href="docs.html" class="nav-cta">Get Started</a>
+      <button class="mobile-menu-btn">☰</button>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <span class="hero-badge">🚀 Version 1.0 Now Available</span>
+      <h1>Nexora<br>The Modern Programming Language</h1>
+      <p class="tagline">Simple as Python. Powerful as JavaScript.</p>
+      
+      <div class="hero-buttons">
+        <a href="docs.html" class="btn btn-primary">
+          Get Started →
+        </a>
+        <a href="playground.html" class="btn btn-secondary">
+          Try Online
+        </a>
+      </div>
+
+      <!-- Code Preview -->
+      <div class="code-preview">
+        <div class="code-header">
+          <span class="code-dot red"></span>
+          <span class="code-dot yellow"></span>
+          <span class="code-dot green"></span>
+          <span class="code-filename">hello.nex</span>
+        </div>
+        <div class="code-content">
+<span class="code-comment">// Nexora - Hello World</span>
+<span class="code-keyword">import</span> { <span class="code-variable">http</span> } <span class="code-keyword">from</span> <span class="code-string">"nexora"</span>
+
+<span class="code-keyword">func</span> <span class="code-function">greet</span>(<span class="code-param">name</span>: <span class="code-class">String</span>): <span class="code-class">String</span> {
+  <span class="code-keyword">return</span> <span class="code-string">"Hello, ${name}!"</span>
+}
+
+<span class="code-keyword">let</span> <span class="code-variable">server</span> = http.<span class="code-function">createServer</span>((<span class="code-param">req</span>, <span class="code-param">res</span>) => {
+  res.<span class="code-function">send</span>(<span class="code-function">greet</span>(<span class="code-string">"World"</span>))
+})
+
+server.<span class="code-function">listen</span>(<span class="code-number">3000</span>)
+<span class="code-variable">print</span>(<span class="code-string">"Server running on port 3000"</span>)
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features">
+    <div class="container">
+      <div class="section-title">
+        <h2>Why Choose Nexora?</h2>
+        <p>A modern language designed for the way you build software today</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h3>Lightning Fast</h3>
+          <p>Compiled to optimized bytecode with JIT compilation for blazing-fast execution speeds.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">📝</div>
+          <h3>Simple Syntax</h3>
+          <p>Clean, readable syntax that feels natural. Write less code, do more.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🌐</div>
+          <h3>Built-in Web</h3>
+          <p>First-class support for HTTP servers, WebSockets, and modern web development.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">📦</div>
+          <h3>Package Manager</h3>
+          <p>Built-in package manager with access to thousands of community packages.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">📚</div>
+          <h3>Standard Library</h3>
+          <p>Comprehensive stdlib covering files, networking, crypto, and more.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">💻</div>
+          <h3>Cross-platform</h3>
+          <p>Write once, run anywhere. Windows, macOS, and Linux support out of the box.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Download Section -->
+  <section class="download">
+    <div class="container">
+      <div class="section-title">
+        <h2>Download Nexora</h2>
+        <p>Available for all major platforms</p>
+      </div>
+
+      <div class="download-grid">
+        <div class="download-card">
+          <div class="download-icon">🪟</div>
+          <h3>Windows</h3>
+          <p>Windows 10/11 (x64)</p>
+          <a href="#" class="btn btn-primary">Download v1.0.0</a>
+        </div>
+
+        <div class="download-card">
+          <div class="download-icon">🍎</div>
+          <h3>macOS</h3>
+          <p>Intel & Apple Silicon</p>
+          <a href="#" class="btn btn-primary">Download v1.0.0</a>
+        </div>
+
+        <div class="download-card">
+          <div class="download-icon">🐧</div>
+          <h3>Linux</h3>
+          <p>AppImage, deb, rpm</p>
+          <a href="#" class="btn btn-primary">Download v1.0.0</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <a href="index.html" class="logo">
+            <img src="logo.svg" alt="Nexora" style="height: 28px;">
+            Nexora
+          </a>
+          <p>The modern programming language for building the future of the web.</p>
+        </div>
+
+        <div class="footer-links">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="docs.html">Documentation</a></li>
+            <li><a href="packages.html">Packages</a></li>
+            <li><a href="playground.html">Playground</a></li>
+            <li><a href="#">Releases</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-links">
+          <h4>Community</h4>
+          <ul>
+            <li><a href="#">GitHub</a></li>
+            <li><a href="#">Discord</a></li>
+            <li><a href="#">Twitter</a></li>
+            <li><a href="#">Stack Overflow</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-links">
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="#">Blog</a></li>
+            <li><a href="#">Tutorials</a></li>
+            <li><a href="#">Examples</a></li>
+            <li><a href="#">FAQ</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2026 Nexora. All rights reserved.</p>
+        <div class="social-links">
+          <a href="#" title="GitHub">⌘</a>
+          <a href="#" title="Discord">◈</a>
+          <a href="#" title="Twitter">◉</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

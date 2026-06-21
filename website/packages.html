@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Packages - Nexora</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="logo">
+        <img src="logo.svg" alt="Nexora">
+        Nexora
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="docs.html">Documentation</a></li>
+        <li><a href="packages.html" class="active">Packages</a></li>
+        <li><a href="playground.html">Playground</a></li>
+      </ul>
+      <a href="docs.html" class="nav-cta">Get Started</a>
+      <button class="mobile-menu-btn">☰</button>
+    </div>
+  </nav>
+
+  <!-- Packages Header -->
+  <section class="packages-header">
+    <div class="container">
+      <h1>Package Registry</h1>
+      <p>Discover and install packages for your Nexora projects</p>
+
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="package-search" placeholder="Search packages..." oninput="filterPackages()">
+      </div>
+
+      <div class="categories">
+        <button class="category-btn active" data-category="all" onclick="filterByCategory('all')">All</button>
+        <button class="category-btn" data-category="web" onclick="filterByCategory('web')">Web</button>
+        <button class="category-btn" data-category="gaming" onclick="filterByCategory('gaming')">Gaming</button>
+        <button class="category-btn" data-category="utility" onclick="filterByCategory('utility')">Utility</button>
+        <button class="category-btn" data-category="database" onclick="filterByCategory('database')">Database</button>
+        <button class="category-btn" data-category="testing" onclick="filterByCategory('testing')">Testing</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Packages Grid -->
+  <section class="container">
+    <div class="packages-grid" id="packages-grid">
+
+      <!-- Gaming Packages -->
+      <div class="package-card" data-category="gaming" data-name="minecraft-nx">
+        <div class="package-header">
+          <span class="package-name">minecraft-nx</span>
+          <span class="package-version">v1.0.0</span>
+        </div>
+        <p>Minecraft bot framework. Connect to servers, chat, build, fight, pathfind with AI.</p>
+        <div class="package-tags">
+          <span class="tag">minecraft</span>
+          <span class="tag">bot</span>
+          <span class="tag">game</span>
+        </div>
+        <div class="package-meta">
+          <span>📥 12.5k</span>
+          <span>⭐ 340</span>
+          <span>👤 nexora-gaming</span>
+        </div>
+      </div>
+
+      <div class="package-card" data-category="gaming" data-name="steam-nx">
+        <div class="package-header">
+          <span class="package-name">steam-nx</span>
+          <span class="package-version">v1.0.0</span>
+        </div>
+        <p>Steam API integration. Users, games, achievements, inventory, trading.</p>
+        <div class="package-tags">
+          <span class="tag">steam</span>
+          <span class="tag">gaming</span>
+          <span class="tag">api</span>
+        </div>
+        <div class="package-meta">
+          <span>📥 8.2k</span>
+          <span>⭐ 210</span>
+          <span>👤 nexora-gaming</span>
+        </div>
+      </div>
+
+      <div class="package-card" data-category="gaming" data-name="roblox-nx">
+        <div class="package-header">
+          <span class="package-name">roblox-nx</span>
+          <span class="package-version">v1.0.0</span>
+        </div>
+        <p>Roblox API integration. Users, games, groups, badges, inventory.</p>
+        <div class="package-tags">
+          <span class="tag">roblox</span>
+          <span class="tag">gaming</span>
+          <span class="tag">api</span>
+        </div>
+        <div class="package-meta">
+          <span>📥 6.8k</span>
+          <span>⭐ 180</span>
+          <span>👤 nexora-gaming</span>
+        </div>
+      </div>
+
+      <div class="package-card" data-category="gaming" data-name="discord-nx">
+        <div class="package-header">
+          <span class="package-name">discord-nx</span>
+          <span class="package-version">v1.0.0</span>
+        </div>
+        <p>Discord bot framework. Client, embeds, slash commands, buttons, permissions.</p>
+        <div class="package-tags">
+          <span class="tag">discord</span>
+          <span class="tag">bot</span>
+          <span class="tag">chat</span>
+        </div>
+        <div class="package-meta">
+          <span>📥 28.4k</span>
+          <span>⭐ 890</span>
+          <span>👤 nexora-gaming</span>
+        </div>
+      </div>
+
+      <!-- Web Packages -->
+      <div class="package-card" data-category="web" data-name="nexora-http">
+        <div class="package-header">
+          <span class="package-name">nexora-http</span>
+          <span class="package-version">v2.4.0</span>
+        </div>
+        <p>Lightweight HTTP framework for building web applications and APIs.</p>
+        <div class="package-tags">
+          <span class="tag">http</span>
+          <span class="tag">web</span>
+          <span class="tag">api</span>
+        </div>
+        <div class="package-meta">
+          <span>📥 45.2k</span>
+          <span>⭐ 1.2k</span>
+          <span>👤 nexora-team</span>
+        </div>
+      </div>
+
+      <div class="package-card" data-category="web" data-name="express-nx">
+        <div class="package-header">
+          <span class="package-name">express-nx</span>
+          <span class="package-version">v1.8.3</span>
+        </div>
+        <p>Express.js inspired framework for Nexora with middleware support.</p>
+        <div class="package-tags">
+          <span class="tag">express</span>
+          <span class="tag">web</span>
+          <span class="tag">middleware</span>
+        </div>
+        <div class="package-meta">
+          <span>📥 32.1k</span>
+          <span>⭐ 890</span>
+          <span>👤 webdev</span>
+        </div>
+      </div>
+
+      <div class="package-card" data-category="web" data-name="nexora-websocket">
+        <div class="package-header">
+          <span class="package-name">nexora-websocket</span>
+          <span class="package-version">v1.2.0</span>
+        </div>
+        <p>WebSocket library for real-time communication in Nexora.</p>
+        <div class="package-tags">
+          <span class="tag">websocket</span>
+          <span class="tag">realtime</span>
+          <span class="tag">chat</span>
+        </div>
+        <div class="package-meta">
+          <span>📥 18.5k</span>
+          <span>⭐ 456</span>
+          <span>👤 realtime</span>
+        </div>
+      </div>
+
+      <!-- Utility Packages -->
+      <div class="package-card" data-category="utility" data-name="lodash-nx">
+        <div class="package-header">
+          <span class="package-name">lodash-nx</span>
+          <span class="package-version">v4.17.21</span>
+        </div>
+        <p>Utility functions for arrays, objects, strings, and more.</p>
+        <div class="package-tags">
+          <span class="tag">lodash</span>
+          <span class="tag">utility</span>
+          <span class="tag">functional</span>
+        </div>
+        <div class="package-meta">
+          <span>📥 89.2k</span>
+          <span>⭐ 2.1k</span>
+          <span>👤 community</span>
+        </div>
+      </div>
+
+      <div class="package-card" data-category="utility" data-name="nexora-auth">
+        <div class="package-header">
+          <span class="package-name">nexora-auth</span>
+          <span class="package-version">v1.5.0</span>
+        </div>
+        <p>Authentication library with JWT, OAuth2, and session support.</p>
+        <div class="package-tags">
+          <span class="tag">auth</span>
+          <span class="tag">jwt</span>
+          <span class="tag">oauth</span>
+        </div>
+        <div class="package-meta">
+          <span>📥 24.3k</span>
+          <span>⭐ 670</span>
+          <span>👤 nexora-team</span>
+        </div>
+      </div>
+
+      <div class="package-card" data-category="utility" data-name="nexora-logger">
+        <div class="package-header">
+          <span class="package-name">nexora-logger</span>
+          <span class="package-version">v2.0.1</span>
+        </div>
+        <p>Logging library with multiple transports and log levels.</p>
+        <div class="package-tags">
+          <span class="tag">logging</span>
+          <span class="tag">debug</span>
+          <span class="tag">console</span>
+        </div>
+        <div class="package-meta">
+          <span>📥 56.7k</span>
+          <span>⭐ 1.4k</span>
+          <span>👤 nexora-team</span>
+        </div>
+      </div>
+
+      <!-- Database Packages -->
+      <div class="package-card" data-category="database" data-name="nexora-db">
+        <div class="package-header">
+          <span class="package-name">nexora-db</span>
+          <span class="package-version">v1.8.0</span>
+        </div>
+        <p>Database abstraction layer with support for SQL and NoSQL.</p>
+        <div class="package-tags">
+          <span class="tag">database</span>
+          <span class="tag">sql</span>
+          <span class="tag">nosql</span>
+        </div>
+        <div class="package-meta">
+          <span>📥 31.2k</span>
+          <span>⭐ 780</span>
+          <span>👤 nexora-team</span>
+        </div>
+      </div>
+
+      <!-- Testing Packages -->
+      <div class="package-card" data-category="testing" data-name="nexora-test">
+        <div class="package-header">
+          <span class="package-name">nexora-test</span>
+          <span class="package-version">v1.2.0</span>
+        </div>
+        <p>Testing framework with assertions, mocking, and coverage.</p>
+        <div class="package-tags">
+          <span class="tag">testing</span>
+          <span class="tag">assertions</span>
+          <span class="tag">mock</span>
+        </div>
+        <div class="package-meta">
+          <span>📥 42.8k</span>
+          <span>⭐ 1.1k</span>
+          <span>👤 nexora-team</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- No Results -->
+    <div id="no-results" style="display: none; text-align: center; padding: 4rem;">
+      <h2>No packages found</h2>
+      <p>Try a different search term or category</p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>Nexora</h3>
+          <p>A modern programming language for the future.</p>
+        </div>
+        <div class="footer-section">
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="docs.html">Documentation</a></li>
+            <li><a href="packages.html">Packages</a></li>
+            <li><a href="playground.html">Playground</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>Community</h4>
+          <ul>
+            <li><a href="https://github.com/nexora-lang">GitHub</a></li>
+            <li><a href="https://discord.gg/nexora">Discord</a></li>
+            <li><a href="https://twitter.com/nexoralang">Twitter</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Nexora. Open Source under MIT License.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+  <script>
+    function filterPackages() {
+      const search = document.getElementById('package-search').value.toLowerCase();
+      const cards = document.querySelectorAll('.package-card');
+      let visible = 0;
+
+      cards.forEach(card => {
+        const name = card.dataset.name || '';
+        const text = card.textContent.toLowerCase();
+        const match = name.includes(search) || text.includes(search);
+        card.style.display = match ? 'block' : 'none';
+        if (match) visible++;
+      });
+
+      document.getElementById('no-results').style.display = visible === 0 ? 'block' : 'none';
+    }
+
+    function filterByCategory(category) {
+      document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.category === category);
+      });
+
+      document.querySelectorAll('.package-card').forEach(card => {
+        if (category === 'all') {
+          card.style.display = 'block';
+        } else {
+          card.style.display = card.dataset.category === category ? 'block' : 'none';
+        }
+      });
+    }
+  </script>
+</body>
+</html>

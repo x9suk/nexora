@@ -1,0 +1,77 @@
+// steam-nx: Game collector
+// Shows your Steam library stats
+
+import { SteamClient } from "../src/index.nx"
+
+let client = new SteamClient(process.env.STEAM_API_KEY)
+
+async function showLibrary(steamId) {
+  console.log("Loading library...")
+
+  // Get user info
+  let users = await client.getUserSummaries(steamId)
+  if (!users || users.length === 0) {
+    console.log("User not found!")
+    return
+  }
+
+  let user = users[0]
+  console.log("Steam User: " + user.personaName)
+  console.log("Profile: " + user.profileUrl)
+  console.log("")
+
+  // Get games
+  let games = await client.getOwnedGames(steamId)
+  console.log("Total Games: " + games.length)
+  console.log("")
+
+  // Sort by playtime
+  games.sort((a, b) => b.playtime_forever - a.playtime_forever)
+
+  // Show top 10 most played
+  console.log("=== Top 10 Most Played ===")
+  for (let i = 0; i < Math.min(10, games.length); i++) {
+    let game = games[i]
+    let hours = Math.round(game.playtime_forever / 60)
+    console.log((i + 1) + ". " + game.name + " - " + hours + " hours")
+  }
+
+  console.log("")
+
+  // Show recently played
+  let recent = await client.getRecentlyPlayedGames(steamId, 5)
+  console.log("=== Recently Played ===")
+  for (let game of recent) {
+    let hours = Math.round(game.playtime_forever / 60)
+    console.log("- " + game.name + " - " + hours + " hours")
+  }
+
+  console.log("")
+
+  // Calculate total playtime
+  let totalMinutes = games.reduce((sum, g) => sum + g.playtime_forever, 0)
+  let totalHours = Math.round(totalMinutes / 60)
+  let totalDays = Math.round(totalHours / 24 * 10) / 10
+
+  console.log("=== Stats ===")
+  console.log("Total Playtime: " + totalHours + " hours (" + totalDays + " days)")
+  console.log("Average per Game: " + Math.round(totalHours / games.length) + " hours")
+
+  // Show achievements for top game
+  if (games.length > 0) {
+    let topGame = games[0]
+    console.log("")
+    console.log("=== Achievements for " + topGame.name + " ===")
+
+    let achievements = await client.getPlayerAchievements(steamId, topGame.appid)
+    let unlocked = achievements.filter(a => a.achieved)
+    console.log("Unlocked: " + unlocked.length + "/" + achievements.length)
+
+    for (let a of unlocked.slice(0, 5)) {
+      console.log("- " + a.name)
+    }
+  }
+}
+
+// Replace with your Steam ID
+await showLibrary("76561198000000000")

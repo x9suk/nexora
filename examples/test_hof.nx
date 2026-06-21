@@ -1,0 +1,13 @@
+let multiplier = 3
+let multiply = x => x * multiplier
+print multiply(5)
+
+let numbers = [1, 2, 3, 4, 5]
+let doubled = map(numbers, x => x * 2)
+print doubled
+
+let evens = filter(numbers, x => x % 2 == 0)
+print evens
+
+let sum = reduce(numbers, (acc, x) => acc + x, 0)
+print sum

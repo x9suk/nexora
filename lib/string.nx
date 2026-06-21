@@ -1,0 +1,204 @@
+// Nexora String Standard Library
+// Usage: import { uppercase, lowercase } from "string"
+
+func uppercase(s) {
+    return upper(s)
+}
+
+func lowercase(s) {
+    return lower(s)
+}
+
+func trim(s) {
+    return trim(s)
+}
+
+func starts_with(s, prefix) {
+    return starts_with(s, prefix)
+}
+
+func ends_with(s, suffix) {
+    return ends_with(s, suffix)
+}
+
+func contains(s, sub) {
+    return contains(s, sub)
+}
+
+func replace(s, old, new) {
+    return replace(s, old, new)
+}
+
+func split(s, delim) {
+    return split(s, delim)
+}
+
+func join(arr, delim) {
+    return join(arr, delim)
+}
+
+func char_at(s, i) {
+    return char_at(s, i)
+}
+
+func to_chars(s) {
+    return to_chars(s)
+}
+
+func lines(s) {
+    return lines(s)
+}
+
+func repeat(s, n) {
+    return repeat(s, n)
+}
+
+func reverse(s) {
+    let chars = to_chars(s)
+    let result = ""
+    let i = len(chars) - 1
+    while i >= 0 {
+        result = result + chars[i]
+        i = i - 1
+    }
+    return result
+}
+
+func is_empty(s) {
+    return len(s) == 0
+}
+
+func length(s) {
+    return len(s)
+}
+
+func substring(s, start, end) {
+    return slice(s, start, end)
+}
+
+func index_of(s, sub) {
+    return index_of(s, sub)
+}
+
+func to_int(s) {
+    return int(s)
+}
+
+func to_float(s) {
+    return float(s)
+}
+
+func to_string(x) {
+    return str(x)
+}
+
+func format(s, ...) {
+    // Basic string formatting
+    return s
+}
+
+func pad_left(s, len, ch) {
+    while length(s) < len {
+        s = ch + s
+    }
+    return s
+}
+
+func pad_right(s, len, ch) {
+    while length(s) < len {
+        s = s + ch
+    }
+    return s
+}
+
+func center(s, len, ch) {
+    let pad = len - length(s)
+    let left = pad / 2
+    let right = pad - left
+    while left > 0 {
+        s = ch + s
+        left = left - 1
+    }
+    while right > 0 {
+        s = s + ch
+        right = right - 1
+    }
+    return s
+}
+
+func count(s, sub) {
+    let count = 0
+    let i = index_of(s, sub)
+    while i != -1 {
+        count = count + 1
+        i = index_of(slice(s, i + length(sub), length(s)), sub)
+        if i != -1 {
+            i = i + length(sub)
+        }
+    }
+    return count
+}
+
+func starts_with_any(s, prefixes) {
+    for prefix in prefixes {
+        if starts_with(s, prefix) {
+            return true
+        }
+    }
+    return false
+}
+
+func ends_with_any(s, suffixes) {
+    for suffix in suffixes {
+        if ends_with(s, suffix) {
+            return true
+        }
+    }
+    return false
+}
+
+func is_alpha(s) {
+    if is_empty(s) {
+        return false
+    }
+    let chars = to_chars(s)
+    for c in chars {
+        let code = int(c)
+        if !(code >= 65 && code <= 90) && !(code >= 97 && code <= 122) {
+            return false
+        }
+    }
+    return true
+}
+
+func is_digit(s) {
+    if is_empty(s) {
+        return false
+    }
+    let chars = to_chars(s)
+    for c in chars {
+        let code = int(c)
+        if !(code >= 48 && code <= 57) {
+            return false
+        }
+    }
+    return true
+}
+
+func is_alphanumeric(s) {
+    return is_alpha(s) || is_digit(s)
+}
+
+func char_code(s) {
+    return int(s)
+}
+
+func from_char_code(n) {
+    // Simple ASCII char from code
+    let chars = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+    let i = n - 32
+    if i >= 0 && i < length(chars) {
+        return char_at(chars, i)
+    }
+    return "?"
+}

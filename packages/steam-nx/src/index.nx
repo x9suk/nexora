@@ -1,0 +1,297 @@
+// steam-nx: Steam API integration for Nexora
+// Store, friends, achievements, inventory, and more
+
+import { http } from "http"
+import { json } from "json"
+
+// ==================== Constants ====================
+
+const STEAM_API = "https://api.steampowered.com"
+const STEAM_STORE = "https://store.steampowered.com/api"
+const STEAM_CDN = "https://cdn.akamai.steamstatic.com"
+
+// ==================== Steam API Client ====================
+
+class SteamClient {
+  apiKey = ""
+
+  constructor(apiKey) {
+    this.apiKey = apiKey
+  }
+
+  async request(url) {
+    let separator = url.includes("?") ? "&" : "?"
+    let response = await http.fetch(url + separator + "key=" + this.apiKey)
+    return json.parse(response.body)
+  }
+
+  // ==================== User Methods ====================
+
+  async getUserSummaries(steamIds) {
+    let ids = Array.isArray(steamIds) ? steamIds.join(",") : steamIds
+    let data = await this.request(STEAM_API + "/ISteamUser/GetPlayerSummaries/v2/?steamids=" + ids)
+    return data.response ? data.response.players : []
+  }
+
+  async getUserFriends(steamId) {
+    let data = await this.request(STEAM_API + "/ISteamUser/GetFriendList/v1/?steamid=" + steamId)
+    return data.friendslist ? data.friendslist.friends : []
+  }
+
+  async getUserGroups(steamId) {
+    let data = await this.request(STEAM_API + "/ISteamUser/GetUserGroups/v1/?steamid=" + steamId)
+    return data.groups ? data.groups.groups : []
+  }
+
+  async resolveVanityUrl(vanityUrl) {
+    let data = await this.request(STEAM_API + "/ISteamUser/ResolveVanityURL/v1/?vanityurl=" + vanityUrl)
+    return data.response ? data.response.steamid : null
+  }
+
+  // ==================== Game Methods ====================
+
+  async getOwnedGames(steamId) {
+    let data = await this.request(STEAM_API + "/IPlayerService/GetOwnedGames/v1/?steamid=" + steamId + "&include_appinfo=1&include_played_free_games=1")
+    return data.response ? data.response.games : []
+  }
+
+  async getRecentlyPlayedGames(steamId, count = 10) {
+    let data = await this.request(STEAM_API + "/IPlayerService/GetRecentlyPlayedGames/v1/?steamid=" + steamId + "&count=" + count)
+    return data.response ? data.response.games : []
+  }
+
+  async getFeaturedGames() {
+    let data = await http.fetch(STEAM_STORE + "/featured/")
+    return json.parse(data.body)
+  }
+
+  async getAppDetails(appId) {
+    let data = await http.fetch(STEAM_STORE + "/appdetails?appids=" + appId)
+    let result = json.parse(data.body)
+    return result[appId] ? result[appId].data : null
+  }
+
+  async searchApps(query) {
+    let data = await http.fetch(STEAM_STORE + "/storesearch/?term=" + encodeURIComponent(query))
+    return json.parse(data.body)
+  }
+
+  // ==================== Achievement Methods ====================
+
+  async getPlayerAchievements(steamId, appId) {
+    let data = await this.request(STEAM_API + "/ISteamUserStats/GetPlayerAchievements/v1/?steamid=" + steamId + "&appid=" + appId)
+    return data.playerstats ? data.playerstats.achievements : []
+  }
+
+  async getSchemaForGame(appId) {
+    let data = await this.request(STEAM_API + "/ISteamUserStats/GetSchemaForGame/v2/?appid=" + appId)
+    return data.game ? data.game : null
+  }
+
+  async getGlobalAchievementPercentages(appId) {
+    let data = await this.request(STEAM_API + "/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/?gameid=" + appId)
+    return data.achievementpercentages ? data.achievementpercentages.achievements : []
+  }
+
+  // ==================== Stats Methods ====================
+
+  async getPlayerStats(steamId, appId) {
+    let data = await this.request(STEAM_API + "/ISteamUserStats/GetPlayerStatsForGame/v2/?steamid=" + steamId + "&appid=" + appId)
+    return data.playerstats ? data.playerstats : null
+  }
+
+  async getGlobalStatsForGame(appId, statNames) {
+    let stats = Array.isArray(statNames) ? statNames.join(",") : statNames
+    let data = await this.request(STEAM_API + "/ISteamUserStats/GetGlobalStatsForGame/v1/?appid=" + appId + "&count=" + statNames.length + "&name[0]=" + stats)
+    return data.response ? data.response : null
+  }
+
+  // ==================== Inventory Methods ====================
+
+  async getInventory(steamId, appid = 730) {
+    let data = await http.fetch(STEAM_API + "/IPlayerService/GetInventory/v1/?steamid=" + steamId + "&appid=" + appid + "&key=" + this.apiKey)
+    return json.parse(data.body)
+  }
+
+  // ==================== Trading Methods ====================
+
+  async getTradeOffers(steamId, received = true, sent = true) {
+    let receivedOffers = received ? "1" : "0"
+    let sentOffers = sent ? "1" : "0"
+    let data = await this.request(STEAM_API + "/IEconService/GetTradeOffers/v1/?get_received_offers=" + receivedOffers + "&get_sent_offers=" + sentOffers)
+    return data.response ? data.response : null
+  }
+
+  // ==================== Friends Methods ====================
+
+  async getOnlineFriends(steamId) {
+    let friends = await this.getUserFriends(steamId)
+    let online = []
+
+    for (let i = 0; i < friends.length; i++) {
+      let friend = friends[i]
+      if (friend.friend_since > 0) {
+        online.push(friend)
+      }
+    }
+
+    return online
+  }
+
+  async getFriendSummaries(steamId) {
+    let friends = await this.getUserFriends(steamId)
+    let steamIds = friends.map(f => f.steamid)
+    return await this.getUserSummaries(steamIds)
+  }
+
+  // ==================== News Methods ====================
+
+  async getGameNews(appId, count = 10) {
+    let data = await http.fetch(STEAM_API + "/ISteamNews/GetNewsForApp/v2/?appid=" + appId + "&count=" + count)
+    return data.appnews ? data.appnews.newsitems : []
+  }
+
+  // ==================== Workshop Methods ====================
+
+  async getPublishedFiles(steamId, appId) {
+    let data = await this.request(STEAM_API + "/ISteamRemoteStorage/GetPublishedFileDetails/v1/")
+    return data.response ? data.response.publishedfiledetails : []
+  }
+
+  // ==================== Utility ====================
+
+  getAvatarUrl(avatarHash, size = "medium") {
+    let sizes = {
+      small: "32x32",
+      medium: "64x64",
+      large: "184x184",
+    }
+    return STEAM_CDN + "/steamapps/public/images/avatars/" + avatarHash + ".jpg"
+  }
+
+  getGameUrl(appId) {
+    return "https://store.steampowered.com/app/" + appId
+  }
+
+  getProfileUrl(steamId) {
+    return "https://steamcommunity.com/profiles/" + steamId
+  }
+}
+
+// ==================== Steam User ====================
+
+class SteamUser {
+  steamId = ""
+  personaName = ""
+  avatar = ""
+  avatarMedium = ""
+  avatarFull = ""
+  profileUrl = ""
+  personaState = 0
+  realName = ""
+  primaryClanId = ""
+  timeCreated = 0
+  gameServerIp = ""
+  gameServerPort = 0
+  gameTimeCreated = 0
+
+  constructor(data) {
+    this.steamId = data.steamid
+    this.personaName = data.personaname
+    this.avatar = data.avatar
+    this.avatarMedium = data.avatarmedium
+    this.avatarFull = data.avatarfull
+    this.profileUrl = data.profileurl
+    this.personaState = data.personastate
+    this.realName = data.realname || ""
+    this.primaryClanId = data.primaryclanid || ""
+    this.timeCreated = data.timecreated || 0
+    this.gameServerIp = data.gameserverip || ""
+    this.gameServerPort = data.gameserverport || 0
+    this.gameTimeCreated = data.gametimecreated || 0
+  }
+
+  isOnline() {
+    return this.personaState > 0
+  }
+
+  isPlayingGame() {
+    return this.gameTimeCreated > 0
+  }
+
+  getProfileUrl() {
+    return "https://steamcommunity.com/profiles/" + this.steamId
+  }
+}
+
+// ==================== Steam Game ====================
+
+class SteamGame {
+  appId = 0
+  name = ""
+  playtimeForever = 0
+  playtimeWindowsForever = 0
+  playtimeMacForever = 0
+  playtimeLinuxForever = 0
+  imgIconUrl = ""
+  headerImage = ""
+
+  constructor(data) {
+    this.appId = data.appid
+    this.name = data.name
+    this.playtimeForever = data.playtime_forever || 0
+    this.playtimeWindowsForever = data.playtime_windows_forever || 0
+    this.playtimeMacForever = data.playtime_mac_forever || 0
+    this.playtimeLinuxForever = data.playtime_linux_forever || 0
+    this.imgIconUrl = data.img_icon_url || ""
+    this.headerImage = data.header_image || ""
+  }
+
+  getPlaytimeHours() {
+    return Math.round(this.playtimeForever / 60 * 10) / 10
+  }
+
+  getStoreUrl() {
+    return "https://store.steampowered.com/app/" + this.appId
+  }
+}
+
+// ==================== Steam Achievement ====================
+
+class SteamAchievement {
+  apiName = ""
+  displayName = ""
+  description = ""
+  achieved = false
+  unlockTime = 0
+  globalPercentage = 0
+
+  constructor(data) {
+    this.apiName = data.apiname
+    this.displayName = data.displayName
+    this.description = data.description
+    this.achieved = data.achieved === 1
+    this.unlockTime = data.unlocktime || 0
+    this.globalPercentage = data.globalpercentage || 0
+  }
+
+  getUnlockDate() {
+    if (!this.unlockTime) return null
+    return new Date(this.unlockTime * 1000).toISOString()
+  }
+}
+
+// ==================== Export All ====================
+
+export {
+  // Classes
+  SteamClient,
+  SteamUser,
+  SteamGame,
+  SteamAchievement,
+
+  // Constants
+  STEAM_API,
+  STEAM_STORE,
+  STEAM_CDN,
+}

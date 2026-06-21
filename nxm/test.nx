@@ -1,0 +1,6 @@
+// Nexora - Tests
+test "basic test" {
+    assert(1 + 1 == 2, "Math is broken!")
+    assert("hello" == "hello", "String equality broken!")
+    print "All tests passed!"
+}

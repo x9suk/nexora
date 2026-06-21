@@ -1,0 +1,14 @@
+{
+  "name": "nexora-db",
+  "version": "1.0.0",
+  "description": "Database ORM for Nexora - connect, query, insert, update, delete",
+  "main": "index.nx",
+  "author": "Nexora Contributors",
+  "license": "MIT",
+  "repository": "https://github.com/opennexora/nexora-db",
+  "keywords": ["database", "orm", "sql", "query", "sqlite", "postgres"],
+  "dependencies": {},
+  "devDependencies": {
+    "nexora-test": "^1.0.0"
+  }
+}

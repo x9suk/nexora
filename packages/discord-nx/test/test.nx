@@ -1,0 +1,94 @@
+// discord-nx: Tests
+
+import { describe, it, expect } from "test"
+import { Embed, ActionRow, ButtonStyles, Permissions, hasPermission, snowflakeToTimestamp } from "../src/index.nx"
+
+describe("Embed Builder", () => {
+  it("creates basic embed", () => {
+    let embed = new Embed()
+      .setTitle("Test Title")
+      .setDescription("Test Description")
+      .setColor(0xff0000)
+
+    let data = embed.build()
+    expect(data.title).toEqual("Test Title")
+    expect(data.description).toEqual("Test Description")
+    expect(data.color).toEqual(0xff0000)
+  })
+
+  it("adds fields", () => {
+    let embed = new Embed()
+      .addField("Field 1", "Value 1", true)
+      .addField("Field 2", "Value 2", false)
+
+    let data = embed.build()
+    expect(data.fields.length).toEqual(2)
+    expect(data.fields[0].name).toEqual("Field 1")
+    expect(data.fields[0].inline).toEqual(true)
+  })
+
+  it("sets footer and author", () => {
+    let embed = new Embed()
+      .setFooter("Footer Text")
+      .setAuthor("Author Name")
+
+    let data = embed.build()
+    expect(data.footer.text).toEqual("Footer Text")
+    expect(data.author.name).toEqual("Author Name")
+  })
+
+  it("sets timestamp", () => {
+    let embed = new Embed()
+      .setTimestamp()
+
+    let data = embed.build()
+    expect(data.timestamp).toNotBeUndefined()
+  })
+})
+
+describe("ActionRow", () => {
+  it("adds buttons", () => {
+    let row = new ActionRow()
+      .addButton({ style: ButtonStyles.PRIMARY, label: "Click Me", customId: "btn1" })
+
+    let data = row.build()
+    expect(data.type).toEqual(1)
+    expect(data.components.length).toEqual(1)
+    expect(data.components[0].label).toEqual("Click Me")
+  })
+
+  it("adds select menu", () => {
+    let row = new ActionRow()
+      .addSelectMenu({
+        customId: "select1",
+        placeholder: "Choose an option",
+        options: [
+          { label: "Option 1", value: "opt1" },
+          { label: "Option 2", value: "opt2" },
+        ],
+      })
+
+    let data = row.build()
+    expect(data.components.length).toEqual(1)
+    expect(data.components[0].type).toEqual(3)
+  })
+})
+
+describe("Permissions", () => {
+  it("checks permission", () => {
+    let perms = Permissions.SEND_MESSAGES | Permissions.VIEW_CHANNEL
+    expect(hasPermission(perms, Permissions.SEND_MESSAGES)).toEqual(true)
+    expect(hasPermission(perms, Permissions.ADMINISTRATOR)).toEqual(false)
+  })
+})
+
+describe("Snowflake", () => {
+  it("converts snowflake to timestamp", () => {
+    // Discord epoch + 1000ms = 1420070401000
+    let snowflake = (1 << 22) + 1000
+    let timestamp = snowflakeToTimestamp(snowflake.toString())
+    expect(timestamp).toNotBeUndefined()
+  })
+})
+
+console.log("All discord-nx tests passed!")

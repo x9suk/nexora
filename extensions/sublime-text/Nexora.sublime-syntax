@@ -1,0 +1,126 @@
+%YAML 1.2
+---
+name: Nexora
+file_extensions:
+  - nx
+scope: source.nexora
+
+contexts:
+  main:
+    - include: comments
+    - include: strings
+    - include: interpolation
+    - include: keywords
+    - include: builtins
+    - include: operators
+    - include: delimiters
+    - include: numbers
+    - include: constants
+    - include: function_call
+    - include: variable
+    - include: html_tags
+
+  comments:
+    - match: '//.*$'
+      scope: comment.line.double-slash.nexora
+    - match: '/\*'
+      scope: punctuation.definition.comment.begin.nexora
+      push: block_comment
+
+  block_comment:
+    - meta_scope: comment.block.nexora
+    - match: '\*/'
+      scope: punctuation.definition.comment.end.nexora
+      pop: true
+    - include: else_fail
+
+  strings:
+    - match: '"'
+      scope: punctuation.definition.string.begin.nexora
+      push: string_double
+
+  string_double:
+    - meta_scope: string.quoted.double.nexora
+    - match: '\\[nt\\"]'
+      scope: constant.character.escape.nexora
+    - match: '\$\{'
+      scope: punctuation.definition.interpolation.begin.nexora
+      set: interpolation_scope
+    - match: '"'
+      scope: punctuation.definition.string.end.nexora
+      pop: true
+
+  interpolation:
+    - match: '\$\{'
+      scope: punctuation.definition.interpolation.begin.nexora
+      push: interpolation_scope
+
+  interpolation_scope:
+    - meta_scope: meta.interpolation.nexora
+    - match: '\}'
+      scope: punctuation.definition.interpolation.end.nexora
+      pop: true
+    - include: main
+
+  keywords:
+    - match: \b(let|func|return|if|else|while|for|in|break|continue|import|from|class|new|this|extends|super|try|catch|finally|throw|assert|test|async|await|match|case)\b
+      scope: keyword.control.nexora
+
+  builtins:
+    - match: \b(print|input|type_of|str|int|float|len|push|pop|sort|reverse|unique|flatten|range|zip|keys|values|entries|map|filter|reduce|read_file|write_file|json_parse|json_stringify|http_get|http_post|sqrt|pow|abs|floor|ceil|round|min|max|random|now|timestamp|env|exec_command|sleep|exists)\b
+      scope: support.function.builtin.nexora
+    - match: \b(div|h[1-6]|p|span|a|ul|ol|li|table|tr|td|button|form|section|nav|header|footer|main|element|html|render)\b
+      scope: support.function.html.nexora
+
+  operators:
+    - match: '(\*\*)'
+      scope: keyword.operator.arithmetic.nexora
+    - match: '(!=|==|<=|>=|=>|&&|\|\||[+\-*/%=<>!])'
+      scope: keyword.operator.nexora
+
+  delimiters:
+    - match: '[()[\]{}]'
+      scope: punctuation.definition.braces.nexora
+    - match: '[;:,]'
+      scope: punctuation.separator.nexora
+    - match: '\.'
+      scope: punctuation.accessor.nexora
+
+  numbers:
+    - match: '\b\d+\.?\d*\b'
+      scope: constant.numeric.nexora
+
+  constants:
+    - match: \b(true|false|null)\b
+      scope: constant.language.nexora
+
+  function_call:
+    - match: '([a-zA-Z_]\w*)(?=\s*\()'
+      scope: entity.name.function.nexora
+
+  variable:
+    - match: '\b[a-zA-Z_]\w*\b'
+      scope: variable.other.nexora
+
+  html_tags:
+    - match: '<([a-zA-Z][a-zA-Z0-9]*)\b'
+      scope: entity.name.tag.nexora
+      push: html_tag
+
+  html_tag:
+    - meta_scope: meta.tag.nexora
+    - match: '>'
+      scope: punctuation.definition.tag.end.nexora
+      pop: true
+    - match: '/>'
+      scope: punctuation.definition.tag.end.nexora
+      pop: true
+    - include: attribute
+
+  attribute:
+    - match: '([a-zA-Z\-]+)(=)'
+      captures:
+        1: entity.other.attribute-name.nexora
+        2: punctuation.separator.key-value.nexora
+    - match: '"[^"]*"'
+      scope: string.quoted.double.nexora

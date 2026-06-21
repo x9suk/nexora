@@ -1,0 +1,15 @@
+[package]
+name = "nexora-runtime"
+version = "0.1.0"
+edition = "2021"
+authors = ["Nexora Team"]
+description = "Nexora Language Runtime - Interpreter and Value System"
+license = "MIT"
+
+[dependencies]
+nexora-compiler = { path = "../compiler" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
+reqwest = { version = "0.11", features = ["json", "blocking"] }
+tokio = { version = "1", features = ["full"] }

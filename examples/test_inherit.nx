@@ -1,0 +1,22 @@
+// Test classes with inheritance
+class Animal {
+    func init(name) {
+        this.name = name
+    }
+    func speak() {
+        return "${this.name} makes a sound"
+    }
+}
+
+class Dog extends Animal {
+    func init(name) {
+        super(name)
+    }
+    func bark() {
+        return "${this.name} barks!"
+    }
+}
+
+let rex = new Dog("Rex")
+print rex.bark()
+print rex.speak()

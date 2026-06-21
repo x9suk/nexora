@@ -1,0 +1,74 @@
+print "=== Nexora v0.3 - New Features ==="
+
+// === STRING INTERPOLATION ===
+print ""
+print "--- String Interpolation ---"
+let name = "Nexora"
+let version = 3
+print "Hello ${name} v${version}!"
+print "2 + 3 = ${2 + 3}"
+
+// === INHERITANCE ===
+print ""
+print "--- Inheritance ---"
+class Animal {
+    func init(name) {
+        this.name = name
+    }
+    func speak() {
+        return this.name + " makes a sound"
+    }
+}
+
+class Dog extends Animal {
+    func init(name) {
+        this.name = name
+    }
+    func bark() {
+        return this.name + " says woof!"
+    }
+}
+
+let a = new Animal("Generic")
+print a.speak()
+let d = new Dog("Rex")
+print d.bark()
+print d.speak()
+
+// === LAMBDA ===
+print ""
+print "--- Lambda ---"
+let double = x => x * 2
+print "Double 5 = ${double(5)}"
+
+let add = (a, b) => a + b
+print "3 + 4 = ${add(3, 4)}"
+
+let nums = [1, 2, 3, 4, 5]
+let doubled = map(nums, x => x * 2)
+print "Doubled: ${doubled}"
+
+let evens = filter(nums, x => x % 2 == 0)
+print "Evens: ${evens}"
+
+// === MATCH ===
+print ""
+print "--- Match ---"
+let num = 42
+let label = match num {
+    0 => "zero",
+    1 => "one",
+    42 => "the answer"
+}
+print "${num} is ${label}"
+
+let day = "monday"
+let kind = match day {
+    "monday" => "weekday",
+    "saturday" => "weekend"
+}
+print "${day} is a ${kind}"
+
+// === ALL TOGETHER ===
+print ""
+print "=== All v0.3 features working! ==="

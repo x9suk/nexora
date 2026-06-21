@@ -1,0 +1,762 @@
+// minecraft-nx: Minecraft bot framework for Nexora
+// Connect to servers, chat, build, fight, explore
+
+import { http } from "http"
+import { json } from "json"
+import { time } from "time"
+
+// ==================== Constants ====================
+
+const MINECRAFT_API = "https://api.mojang.com"
+const MINECRAFT_SESSION = "https://sessionserver.mojang.com"
+const MINECRAFT_TEXTURES = "http://textures.minecraft.net/texture"
+
+// Block IDs
+const Blocks = {
+  AIR: 0,
+  STONE: 1,
+  GRASS: 2,
+  DIRT: 3,
+  COBBLESTONE: 4,
+  OAK_PLANKS: 5,
+  OAK_SAPLING: 6,
+  BEDROCK: 7,
+  FLOWING_WATER: 8,
+  STILL_WATER: 9,
+  FLOWING_LAVA: 10,
+  STILL_LAVA: 11,
+  SAND: 12,
+  GRAVEL: 13,
+  GOLD_ORE: 14,
+  IRON_ORE: 15,
+  COAL_ORE: 16,
+  OAK_LOG: 17,
+  OAK_LEAVES: 18,
+  SPONGE: 19,
+  GLASS: 20,
+  LAPIS_ORE: 21,
+  LAPIS_BLOCK: 22,
+  SANDSTONE: 24,
+  WOOL: 35,
+  GOLD_BLOCK: 41,
+  IRON_BLOCK: 42,
+  BRICK: 45,
+  TNT: 46,
+  BOOKSHELF: 47,
+  OBSIDIAN: 49,
+  DIAMOND_ORE: 56,
+  DIAMOND_BLOCK: 57,
+  CRAFTING_TABLE: 58,
+  FURNACE: 61,
+  LADDER: 65,
+  COBBLESTONE_STAIRS: 67,
+  REDSTONE_ORE: 73,
+  SNOW_BLOCK: 80,
+  CLAY: 82,
+  FENCE: 85,
+  NETHERRACK: 87,
+  SOUL_SAND: 88,
+  GLOWSTONE: 89,
+  STONE_BRICK: 98,
+  MYCELIUM: 110,
+  NETHER_BRICK: 112,
+  END_STONE: 121,
+  EMERALD_ORE: 129,
+  EMERALD_BLOCK: 133,
+  QUARTZ_BLOCK: 155,
+  HARDENED_CLAY: 172,
+  HAY_BALE: 170,
+  PURPUR_BLOCK: 201,
+  CONCRETE: 251,
+}
+
+// Item IDs
+const Items = {
+  WOODEN_SWORD: 268,
+  WOODEN_PICKAXE: 270,
+  WOODEN_AXE: 271,
+  WOODEN_SHOVEL: 269,
+  STONE_SWORD: 272,
+  STONE_PICKAXE: 274,
+  STONE_AXE: 275,
+  STONE_SHOVEL: 273,
+  IRON_SWORD: 267,
+  IRON_PICKAXE: 257,
+  IRON_AXE: 258,
+  IRON_SHOVEL: 256,
+  DIAMOND_SWORD: 276,
+  DIAMOND_PICKAXE: 278,
+  DIAMOND_AXE: 279,
+  DIAMOND_SHOVEL: 277,
+  GOLD_SWORD: 283,
+  GOLD_PICKAXE: 285,
+  GOLD_AXE: 286,
+  GOLD_SHOVEL: 284,
+  BOW: 261,
+  ARROW: 262,
+  FLINT_AND_STEEL: 259,
+  CHEST: 54,
+  TORCH: 50,
+  WATER_BUCKET: 326,
+  LAVA_BUCKET: 327,
+  BUCKET: 325,
+  BREAD: 297,
+  APPLE: 260,
+  COOKED_BEEF: 364,
+  COOKED_PORKCHOP: 320,
+  COOKED_CHICKEN: 366,
+  GOLDEN_APPLE: 322,
+  ENDER_PEARL: 368,
+  EXPERIENCE_BOTTLE: 384,
+  SPLASH_POTION: 438,
+}
+
+// Mob Types
+const Mobs = {
+  CREEPER: "creeper",
+  SKELETON: "skeleton",
+  ZOMBIE: "zombie",
+  SPIDER: "spider",
+  ENDERMAN: "enderman",
+  SLIME: "slime",
+  GHAST: "ghast",
+  PIGLIN: "piglin",
+  BLAZE: "blaze",
+  CAVE_SPIDER: "cave_spider",
+  SILVERFISH: "silverfish",
+  WITHER_SKELETON: "wither_skeleton",
+  WITCH: "witch",
+  MAGMA_CUBE: "magma_cube",
+  VINDICATOR: "vindicator",
+  EVOKER: "evoker",
+  VEX: "vex",
+  HOGLIN: "hoglin",
+  ZOGLIN: "zoglin",
+  PHANTOM: "phantom",
+  RAVAGER: "ravager",
+  PILLAGER: "pillager",
+  VINDICATION_RAIDER: "vindication_raider",
+  ALLAY: "allay",
+  FROG: "frog",
+  TADPOLE: "tadpole",
+  WARDEN: "warden",
+  // Passive
+  PIG: "pig",
+  COW: "cow",
+  CHICKEN: "chicken",
+  SHEEP: "sheep",
+  HORSE: "horse",
+  DONKEY: "donKEY",
+  MULE: "mule",
+  LLAMA: "llama",
+  BAT: "bat",
+  CAT: "cat",
+  WOLF: "wolf",
+  PARROT: "parrot",
+  TURTLE: "turtle",
+  DOLPHIN: "dolphin",
+  COD: "cod",
+  SALMON: "salmon",
+  TROPICAL_FISH: "tropical_fish",
+  PUFFERFISH: "pufferfish",
+  AXOLOTL: "axolotl",
+  GOAT: "goat",
+  FROG: "frog",
+  CAMEL: "camel",
+  SNIFFER: "sniffer",
+}
+
+// ==================== Mojang API ====================
+
+class MojangAPI {
+  async getPlayer(username) {
+    let response = await http.fetch(MINECRAFT_API + "/users/profiles/minecraft/" + username)
+    if (response.status === 204) return null
+    return json.parse(response.body)
+  }
+
+  async getPlayerByUUID(uuid) {
+    let response = await http.fetch(MINECRAFT_API + "/user/profiles/" + uuid)
+    return json.parse(response.body)
+  }
+
+  async getProfile(uuid) {
+    let response = await http.fetch(MINECRAFT_SESSION + "/session/minecraft/profile/" + uuid)
+    return json.parse(response.body)
+  }
+
+  async getSkin(uuid) {
+    let profile = await this.getProfile(uuid)
+    if (!profile || !profile.properties) return null
+
+    let textures = profile.properties.find(p => p.name === "textures")
+    if (!textures) return null
+
+    let decoded = json.parse(atob(textures.value))
+    return {
+      skin: decoded.textures.SKIN.url,
+      cape: decoded.textures.CAPE ? decoded.textures.CAPE.url : null,
+    }
+  }
+
+  async getNameHistory(uuid) {
+    let response = await http.fetch(MINECRAFT_SESSION + "/session/minecraft/profile/" + uuid + "/names")
+    return json.parse(response.body)
+  }
+}
+
+// ==================== Server Ping ====================
+
+class ServerPing {
+  host = ""
+  port = 25565
+
+  constructor(host, port = 25565) {
+    this.host = host
+    this.port = port
+  }
+
+  async ping() {
+    // In real implementation, use Minecraft protocol
+    // This is a placeholder for the API
+    try {
+      let response = await http.fetch("https://api.mcsrvstat.us/2/" + this.host + ":" + this.port)
+      let data = json.parse(response.body)
+
+      return {
+        online: data.online,
+        hostname: data.hostname,
+        port: data.port,
+        version: data.version,
+        protocol: data.protocol,
+        players: {
+          online: data.players ? data.players.online : 0,
+          max: data.players ? data.players.max : 0,
+        },
+        motd: data.motd ? data.motd.clean : "",
+        favicon: data.icon,
+        mods: data.mods,
+        plugins: data.plugins,
+      }
+    } catch (err) {
+      return { online: false, error: err.message }
+    }
+  }
+}
+
+// ==================== Position ====================
+
+class Position {
+  x = 0
+  y = 0
+  z = 0
+
+  constructor(x = 0, y = 0, z = 0) {
+    this.x = x
+    this.y = y
+    this.z = z
+  }
+
+  distanceTo(other) {
+    let dx = this.x - other.x
+    let dy = this.y - other.y
+    let dz = this.z - other.z
+    return Math.sqrt(dx * dx + dy * dy + dz * dz)
+  }
+
+  equals(other) {
+    return this.x === other.x && this.y === other.y && this.z === other.z
+  }
+
+  add(other) {
+    return new Position(this.x + other.x, this.y + other.y, this.z + other.z)
+  }
+
+  subtract(other) {
+    return new Position(this.x - other.x, this.y - other.y, this.z - other.z)
+  }
+
+  multiply(scalar) {
+    return new Position(this.x * scalar, this.y * scalar, this.z * scalar)
+  }
+
+  floor() {
+    return new Position(Math.floor(this.x), Math.floor(this.y), Math.floor(this.z))
+  }
+
+  toArray() {
+    return [this.x, this.y, this.z]
+  }
+
+  toString() {
+    return this.x + ", " + this.y + ", " + this.z
+  }
+}
+
+// ==================== Vector3 ====================
+
+class Vector3 {
+  x = 0
+  y = 0
+  z = 0
+
+  constructor(x = 0, y = 0, z = 0) {
+    this.x = x
+    this.y = y
+    this.z = z
+  }
+
+  length() {
+    return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z)
+  }
+
+  normalize() {
+    let len = this.length()
+    if (len === 0) return new Vector3()
+    return new Vector3(this.x / len, this.y / len, this.z / len)
+  }
+
+  dot(other) {
+    return this.x * other.x + this.y * other.y + this.z * other.z
+  }
+
+  cross(other) {
+    return new Vector3(
+      this.y * other.z - this.z * other.y,
+      this.z * other.x - this.x * other.z,
+      this.x * other.y - this.y * other.x
+    )
+  }
+
+  distanceTo(other) {
+    return this.subtract(other).length()
+  }
+
+  add(other) {
+    return new Vector3(this.x + other.x, this.y + other.y, this.z + other.z)
+  }
+
+  subtract(other) {
+    return new Vector3(this.x - other.x, this.y - other.y, this.z - other.z)
+  }
+
+  multiply(scalar) {
+    return new Vector3(this.x * scalar, this.y * scalar, this.z * scalar)
+  }
+}
+
+// ==================== Bot ====================
+
+class Bot {
+  username = ""
+  uuid = ""
+  host = ""
+  port = 25565
+  version = "1.20.4"
+  position = null
+  health = 20
+  food = 20
+  experience = 0
+  level = 0
+  inventory = []
+  equipment = {}
+  gameMode = "survival"
+  dimension = "overworld"
+  _connected = false
+  _eventHandlers = {}
+
+  constructor(options) {
+    this.username = options.username
+    this.host = options.host
+    this.port = options.port || 25565
+    this.version = options.version || "1.20.4"
+    this.position = new Position()
+  }
+
+  on(event, handler) {
+    if (!this._eventHandlers[event]) this._eventHandlers[event] = []
+    this._eventHandlers[event].push(handler)
+    return this
+  }
+
+  emit(event, data) {
+    let handlers = this._eventHandlers[event]
+    if (handlers) {
+      for (let i = 0; i < handlers.length; i++) {
+        handlers[i](data)
+      }
+    }
+  }
+
+  async connect() {
+    console.log("[Minecraft] Connecting to " + this.host + ":" + this.port)
+    console.log("[Minecraft] Version: " + this.version)
+    console.log("[Minecraft] Username: " + this.username)
+
+    // In real implementation, use Minecraft protocol
+    this._connected = true
+    this.emit("spawn", { position: this.position })
+    console.log("[Minecraft] Connected!")
+
+    return this
+  }
+
+  async disconnect() {
+    this._connected = false
+    console.log("[Minecraft] Disconnected")
+  }
+
+  // ==================== Chat ====================
+
+  async chat(message) {
+    if (!this._connected) throw new Error("Not connected")
+    console.log("[Chat] <" + this.username + "> " + message)
+    // Send chat packet
+  }
+
+  async whisper(username, message) {
+    await this.chat("/msg " + username + " " + message)
+  }
+
+  async command(cmd) {
+    await this.chat("/" + cmd)
+  }
+
+  // ==================== Movement ====================
+
+  async moveTo(x, y, z) {
+    if (!this._connected) throw new Error("Not connected")
+    this.position = new Position(x, y, z)
+    console.log("[Move] Moving to " + this.position.toString())
+  }
+
+  async lookAt(x, y, z) {
+    console.log("[Look] Looking at " + x + ", " + y + ", " + z)
+  }
+
+  async jump() {
+    console.log("[Jump]")
+  }
+
+  async sprint() {
+    console.log("[Sprint]")
+  }
+
+  async sneak() {
+    console.log("[Sneak]")
+  }
+
+  async swim() {
+    console.log("[Swim]")
+  }
+
+  async climb() {
+    console.log("[Climb]")
+  }
+
+  // ==================== Combat ====================
+
+  async attack(entityId) {
+    console.log("[Attack] Attacking entity " + entityId)
+  }
+
+  async attackEntity(entity) {
+    console.log("[Attack] Attacking " + entity.name)
+  }
+
+  async useItem() {
+    console.log("[Use] Using item in hand")
+  }
+
+  async equip(slot) {
+    console.log("[Equip] Equipping to " + slot)
+  }
+
+  async unequip(slot) {
+    console.log("[Unequip] Unequipping from " + slot)
+  }
+
+  // ==================== Block Interaction ====================
+
+  async digBlock(x, y, z) {
+    console.log("[Dig] Digging block at " + x + ", " + y + ", " + z)
+  }
+
+  async placeBlock(x, y, z, itemId) {
+    console.log("[Place] Placing block at " + x + ", " + y + ", " + z)
+  }
+
+  async useBlock(x, y, z) {
+    console.log("[Use] Using block at " + x + ", " + y + ", " + z)
+  }
+
+  async getBlock(x, y, z) {
+    // In real implementation, query world state
+    return { id: Blocks.AIR, x: x, y: y, z: z }
+  }
+
+  async findBlock(blockId, range = 100) {
+    console.log("[Find] Searching for block " + blockId + " within " + range + " blocks")
+    return null
+  }
+
+  // ==================== Entity Interaction ====================
+
+  async interactEntity(entityId) {
+    console.log("[Interact] Interacting with entity " + entityId)
+  }
+
+  async mountEntity(entityId) {
+    console.log("[Mount] Mounting entity " + entityId)
+  }
+
+  async dismount() {
+    console.log("[Dismount]")
+  }
+
+  // ==================== Inventory ====================
+
+  async getItem(itemId) {
+    return this.inventory.find(i => i.id === itemId)
+  }
+
+  async hasItem(itemId) {
+    return this.inventory.some(i => i.id === itemId)
+  }
+
+  async itemCount(itemId) {
+    let items = this.inventory.filter(i => i.id === itemId)
+    return items.reduce((sum, i) => sum + i.count, 0)
+  }
+
+  async tossItem(itemId, count = 1) {
+    console.log("[Toss] Tossing " + count + " of item " + itemId)
+  }
+
+  async equipItem(itemId, slot) {
+    console.log("[Equip] Equipping item " + itemId + " to " + slot)
+  }
+
+  // ==================== Crafting ====================
+
+  async craft(itemId, count = 1) {
+    console.log("[Craft] Crafting " + count + " of item " + itemId)
+  }
+
+  async openCraftingTable() {
+    console.log("[Craft] Opening crafting table")
+  }
+
+  async closeWindow() {
+    console.log("[Close] Closing window")
+  }
+
+  // ==================== Chest ====================
+
+  async openChest(x, y, z) {
+    console.log("[Chest] Opening chest at " + x + ", " + y + ", " + z)
+  }
+
+  async closeChest() {
+    console.log("[Chest] Closing chest")
+  }
+
+  async chestItems() {
+    return []
+  }
+
+  // ==================== Pathfinder ====================
+
+  async pathfind(target, options = {}) {
+    console.log("[Path] Finding path to " + target.toString())
+    // In real implementation, use A* or other pathfinding
+    return []
+  }
+
+  async goto(x, y, z) {
+    let target = new Position(x, y, z)
+    console.log("[Goto] Going to " + target.toString())
+    await this.moveTo(x, y, z)
+  }
+
+  // ==================== Utility ====================
+
+  async sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms))
+  }
+
+  async waitFor(event, timeout = 30000) {
+    return new Promise((resolve, reject) => {
+      let timer = setTimeout(() => reject(new Error("Timeout")), timeout)
+      this.on(event, (data) => {
+        clearTimeout(timer)
+        resolve(data)
+      })
+    })
+  }
+
+  async waitForItem(itemId, timeout = 30000) {
+    return new Promise((resolve, reject) => {
+      let timer = setTimeout(() => reject(new Error("Timeout waiting for item")), timeout)
+      let check = () => {
+        if (this.hasItem(itemId)) {
+          clearTimeout(timer)
+          resolve(this.getItem(itemId))
+        } else {
+          setTimeout(check, 100)
+        }
+      }
+      check()
+    })
+  }
+}
+
+// ==================== Goal-Based Pathfinding ====================
+
+class GoalBlock {
+  x = 0
+  y = 0
+  z = 0
+
+  constructor(x, y, z) {
+    this.x = x
+    this.y = y
+    this.z = z
+  }
+
+  isReached(bot) {
+    return bot.position.x === this.x && bot.position.y === this.y && bot.position.z === this.z
+  }
+}
+
+class GoalNear {
+  x = 0
+  y = 0
+  z = 0
+  range = 0
+
+  constructor(x, y, z, range) {
+    this.x = x
+    this.y = y
+    this.z = z
+    this.range = range
+  }
+
+  isReached(bot) {
+    let dx = bot.position.x - this.x
+    let dy = bot.position.y - this.y
+    let dz = bot.position.z - this.z
+    return Math.sqrt(dx * dx + dy * dy + dz * dz) <= this.range
+  }
+}
+
+class GoalFollow {
+  entity = null
+  range = 0
+
+  constructor(entity, range) {
+    this.entity = entity
+    this.range = range
+  }
+
+  isReached(bot) {
+    let dx = bot.position.x - this.entity.position.x
+    let dy = bot.position.y - this.entity.position.y
+    let dz = bot.position.z - this.entity.position.z
+    return Math.sqrt(dx * dx + dy * dy + dz * dz) <= this.range
+  }
+}
+
+class GoalInfinite {
+  isReached(bot) {
+    return false
+  }
+}
+
+// ==================== Behavior Tree ====================
+
+class BehaviorTree {
+  root = null
+
+  constructor(root) {
+    this.root = root
+  }
+
+  tick(bot) {
+    return this.root.tick(bot)
+  }
+}
+
+class Sequence {
+  children = []
+
+  constructor(children) {
+    this.children = children
+  }
+
+  tick(bot) {
+    for (let i = 0; i < this.children.length; i++) {
+      let result = this.children[i].tick(bot)
+      if (result !== "success") return result
+    }
+    return "success"
+  }
+}
+
+class Selector {
+  children = []
+
+  constructor(children) {
+    this.children = children
+  }
+
+  tick(bot) {
+    for (let i = 0; i < this.children.length; i++) {
+      let result = this.children[i].tick(bot)
+      if (result !== "failure") return result
+    }
+    return "failure"
+  }
+}
+
+class Inverter {
+  child = null
+
+  constructor(child) {
+    this.child = child
+  }
+
+  tick(bot) {
+    let result = this.child.tick(bot)
+    if (result === "success") return "failure"
+    if (result === "failure") return "success"
+    return result
+  }
+}
+
+// ==================== Export All ====================
+
+export {
+  // Classes
+  MojangAPI,
+  ServerPing,
+  Position,
+  Vector3,
+  Bot,
+  GoalBlock,
+  GoalNear,
+  GoalFollow,
+  GoalInfinite,
+  BehaviorTree,
+  Sequence,
+  Selector,
+  Inverter,
+
+  // Constants
+  Blocks,
+  Items,
+  Mobs,
+  MINECRAFT_API,
+  MINECRAFT_SESSION,
+  MINECRAFT_TEXTURES,
+}

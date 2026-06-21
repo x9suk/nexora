@@ -1,0 +1,14 @@
+{
+  "name": "nexora-auth",
+  "version": "1.0.0",
+  "description": "Authentication for Nexora - login, register, JWT tokens, sessions",
+  "main": "index.nx",
+  "author": "Nexora Contributors",
+  "license": "MIT",
+  "repository": "https://github.com/opennexora/nexora-auth",
+  "keywords": ["auth", "authentication", "jwt", "token", "session", "login"],
+  "dependencies": {},
+  "devDependencies": {
+    "nexora-test": "^1.0.0"
+  }
+}

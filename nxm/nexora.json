@@ -1,0 +1,13 @@
+{
+  "name": "test_project",
+  "version": "1.0.0",
+  "main": "index.nx",
+  "license": "MIT",
+  "scripts": {
+    "test": "nexora run test.nx",
+    "dev": "nexora run index.nx",
+    "build": "nexora run build.nx"
+  },
+  "dependencies": {},
+  "dev_dependencies": {}
+}

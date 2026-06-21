@@ -1,0 +1,100 @@
+// Nexora Math Standard Library
+// Usage: import { sqrt, pow } from "math"
+
+func sqrt(x) {
+    return x ** 0.5
+}
+
+func pow(base, exp) {
+    return base ** exp
+}
+
+func abs(x) {
+    if x < 0 {
+        return -x
+    }
+    return x
+}
+
+func floor(x) {
+    return int(x)
+}
+
+func ceil(x) {
+    let i = int(x)
+    if x > i {
+        return i + 1
+    }
+    return i
+}
+
+func round(x) {
+    return int(x + 0.5)
+}
+
+func min(a, b) {
+    if a < b {
+        return a
+    }
+    return b
+}
+
+func max(a, b) {
+    if a > b {
+        return a
+    }
+    return b
+}
+
+func sin(x) {
+    // Taylor series approximation
+    let result = x
+    let term = x
+    for i in range(1, 10) {
+        term = term * x * x / ((2 * i) * (2 * i + 1))
+        if i % 2 == 0 {
+            result = result + term
+        } else {
+            result = result - term
+        }
+    }
+    return result
+}
+
+func cos(x) {
+    return sin(x + 3.14159265358979 / 2)
+}
+
+func tan(x) {
+    return sin(x) / cos(x)
+}
+
+func log(x) {
+    // Natural log using Newton's method
+    if x <= 0 {
+        return 0
+    }
+    let result = 0.0
+    let y = x
+    while y > 2 {
+        y = y / 2.71828182845904
+        result = result + 1
+    }
+    while y < 0.5 {
+        y = y * 2.71828182845904
+        result = result - 1
+    }
+    result = result + (y - 1) / (y + 1)
+    return result
+}
+
+func ln(x) {
+    return log(x)
+}
+
+func random() {
+    // Simple linear congruential generator
+    let seed = timestamp()
+    seed = (seed * 1103515245 + 12345) % 2147483648
+    return (seed / 2147483648.0)
+}

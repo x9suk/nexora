@@ -1,0 +1,6 @@
+let calc = {
+    "add": func(a, b) { return a + b },
+    "mul": func(a, b) { return a * b }
+}
+print calc.add(2, 3)
+print calc.mul(4, 5)

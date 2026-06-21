@@ -1,0 +1,66 @@
+{
+  "name": "nexora-language",
+  "displayName": "Nexora Language",
+  "description": "Complete Nexora language support - syntax highlighting, snippets, auto-complete, file icons, and more",
+  "version": "1.0.0",
+  "publisher": "nexora-lang",
+  "author": {
+    "name": "Nexora Team",
+    "email": "team@nexora.dev"
+  },
+  "license": "MIT",
+  "homepage": "https://nexora.dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nexora-lang/nexora-vscode"
+  },
+  "bugs": {
+    "url": "https://github.com/nexora-lang/nexora-vscode/issues"
+  },
+  "icon": "./icons/nx-logo.png",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets",
+    "Themes"
+  ],
+  "keywords": [
+    "nexora",
+    "nx",
+    "programming language",
+    "syntax highlighting",
+    "snippets"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "nexora",
+        "aliases": ["Nexora", "nexora"],
+        "extensions": [".nx"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "nexora",
+        "scopeName": "source.nexora",
+        "path": "./syntaxes/nexora.tmLanguage.json"
+      }
+    ],
+    "iconThemes": [
+      {
+        "id": "nexora-icons",
+        "label": "Nexora Icons",
+        "path": "./icons/icon-theme.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "nexora",
+        "path": "./snippets/nexora.json"
+      }
+    ]
+  }
+}

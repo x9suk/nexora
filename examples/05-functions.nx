@@ -1,0 +1,66 @@
+// Functions in Nexora
+
+// Simple function
+func greet(name) {
+    print "Hello, " + name + "!"
+}
+
+greet("Nexora")
+greet("World")
+
+// Function with return value
+func add(a, b) {
+    return a + b
+}
+
+let sum = add(5, 3)
+print "Sum: " + str(sum)
+
+// Function with multiple parameters
+func describe(name, age, city) {
+    print name + " is " + str(age) + " years old and lives in " + city
+}
+
+describe("Ashish", 20, "Mumbai")
+
+// Default parameters
+func greetFormal(name, title = "Mr.") {
+    print "Hello, " + title + " " + name
+}
+
+greetFormal("Smith")
+greetFormal("Johnson", "Dr.")
+
+// Arrow/Lambda functions
+let multiply = func(a, b) => a * b
+print "Product: " + str(multiply(4, 5))
+
+// Higher-order functions
+func apply(func, value) {
+    return func(value)
+}
+
+let double = func(x) => x * 2
+let result = apply(double, 5)
+print "Doubled: " + str(result)
+
+// Function composition
+func compose(f, g) {
+    return func(x) => f(g(x))
+}
+
+let addTen = func(x) => x + 10
+let timesTwo = func(x) => x * 2
+let addTenThenDouble = compose(timesTwo, addTen)
+print "Result: " + str(addTenThenDouble(5))
+
+// Recursive function
+func factorial(n) {
+    if n <= 1 {
+        return 1
+    }
+    return n * factorial(n - 1)
+}
+
+print "5! = " + str(factorial(5))
+print "10! = " + str(factorial(10))

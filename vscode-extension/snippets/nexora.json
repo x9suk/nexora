@@ -1,0 +1,319 @@
+{
+  "Function": {
+    "prefix": "func",
+    "body": [
+      "func ${1:name}(${2:params}) {",
+      "\t${3:// body}",
+      "}"
+    ],
+    "description": "Create a function"
+  },
+  "Arrow Function": {
+    "prefix": "arrow",
+    "body": [
+      "(${1:params}) => ${2:expression}"
+    ],
+    "description": "Create an arrow function"
+  },
+  "Class": {
+    "prefix": "class",
+    "body": [
+      "class ${1:Name} {",
+      "\tinit(${2:params}) {",
+      "\t\t${3:// constructor}",
+      "\t}",
+      "}"
+    ],
+    "description": "Create a class"
+  },
+  "Class with Inheritance": {
+    "prefix": "classext",
+    "body": [
+      "class ${1:Name} extends ${2:Parent} {",
+      "\tinit(${3:params}) {",
+      "\t\tsuper(${4:args})",
+      "\t\t${5:// body}",
+      "\t}",
+      "}"
+    ],
+    "description": "Create a class with inheritance"
+  },
+  "Variable Declaration": {
+    "prefix": "let",
+    "body": [
+      "let ${1:name} = ${2:value}"
+    ],
+    "description": "Declare a variable"
+  },
+  "Constant Declaration": {
+    "prefix": "const",
+    "body": [
+      "const ${1:name} = ${2:value}"
+    ],
+    "description": "Declare a constant"
+  },
+  "If Statement": {
+    "prefix": "if",
+    "body": [
+      "if (${1:condition}) {",
+      "\t${2:// body}",
+      "}"
+    ],
+    "description": "Create an if statement"
+  },
+  "If-Else Statement": {
+    "prefix": "ifelse",
+    "body": [
+      "if (${1:condition}) {",
+      "\t${2:// if body}",
+      "} else {",
+      "\t${3:// else body}",
+      "}"
+    ],
+    "description": "Create an if-else statement"
+  },
+  "For Loop": {
+    "prefix": "for",
+    "body": [
+      "for (let ${1:i} = ${2:0}; ${1:i} < ${3:length}; ${1:i}++) {",
+      "\t${4:// body}",
+      "}"
+    ],
+    "description": "Create a for loop"
+  },
+  "For-Each Loop": {
+    "prefix": "foreach",
+    "body": [
+      "for (let ${1:item} of ${2:collection}) {",
+      "\t${3:// body}",
+      "}"
+    ],
+    "description": "Create a for-each loop"
+  },
+  "While Loop": {
+    "prefix": "while",
+    "body": [
+      "while (${1:condition}) {",
+      "\t${2:// body}",
+      "}"
+    ],
+    "description": "Create a while loop"
+  },
+  "Print Statement": {
+    "prefix": "print",
+    "body": [
+      "print(${1:message})"
+    ],
+    "description": "Print to console"
+  },
+  "Import Module": {
+    "prefix": "import",
+    "body": [
+      "import ${1:module}"
+    ],
+    "description": "Import a module"
+  },
+  "Import with Alias": {
+    "prefix": "importas",
+    "body": [
+      "import ${1:module} as ${2:alias}"
+    ],
+    "description": "Import a module with alias"
+  },
+  "Named Import": {
+    "prefix": "importfrom",
+    "body": [
+      "import { ${1:names} } from \"${2:module}\""
+    ],
+    "description": "Import specific items from a module"
+  },
+  "Export": {
+    "prefix": "export",
+    "body": [
+      "export ${1:declaration}"
+    ],
+    "description": "Export a declaration"
+  },
+  "Async Function": {
+    "prefix": "async",
+    "body": [
+      "async func ${1:name}(${2:params}) {",
+      "\t${3:// body}",
+      "}"
+    ],
+    "description": "Create an async function"
+  },
+  "Await": {
+    "prefix": "await",
+    "body": [
+      "await ${1:expression}"
+    ],
+    "description": "Await a promise"
+  },
+  "Try-Catch": {
+    "prefix": "try",
+    "body": [
+      "try {",
+      "\t${1:// try body}",
+      "} catch (${2:error}) {",
+      "\t${3:// catch body}",
+      "}"
+    ],
+    "description": "Create a try-catch block"
+  },
+  "Lambda": {
+    "prefix": "lambda",
+    "body": [
+      "(${1:params}) => ${2:expression}"
+    ],
+    "description": "Create a lambda expression"
+  },
+  "Match Statement": {
+    "prefix": "match",
+    "body": [
+      "match (${1:value}) {",
+      "\t${2:pattern} => ${3:result}",
+      "\t_ => ${4:default}",
+      "}"
+    ],
+    "description": "Create a match statement"
+  },
+  "Interface": {
+    "prefix": "interface",
+    "body": [
+      "interface ${1:Name} {",
+      "\t${2:property}: ${3:type}",
+      "}"
+    ],
+    "description": "Create an interface"
+  },
+  "Type Alias": {
+    "prefix": "typealias",
+    "body": [
+      "type ${1:Name} = ${2:Type}"
+    ],
+    "description": "Create a type alias"
+  },
+  "Null Check": {
+    "prefix": "nullcheck",
+    "body": [
+      "if (${1:value} !== null) {",
+      "\t${2:// not null}",
+      "}"
+    ],
+    "description": "Check if value is not null"
+  },
+  "Describe Test": {
+    "prefix": "describe",
+    "body": [
+      "describe(\"${1:description}\", () => {",
+      "\t${2:// tests}",
+      "})"
+    ],
+    "description": "Create a test describe block"
+  },
+  "It Test": {
+    "prefix": "it",
+    "body": [
+      "it(\"${1:test name}\", () => {",
+      "\t${2:// test body}",
+      "})"
+    ],
+    "description": "Create a test case"
+  },
+  "Expect": {
+    "prefix": "expect",
+    "body": [
+      "expect(${1:value}).toEqual(${2:expected})"
+    ],
+    "description": "Create an expect assertion"
+  },
+  "Comment": {
+    "prefix": "comment",
+    "body": [
+      "// ${1:description}"
+    ],
+    "description": "Create a single-line comment"
+  },
+  "Block Comment": {
+    "prefix": "blockcomment",
+    "body": [
+      "/*",
+      "\t${1:description}",
+      "*/"
+    ],
+    "description": "Create a block comment"
+  },
+  "Main Function": {
+    "prefix": "main",
+    "body": [
+      "func main() {",
+      "\t${1:// entry point}",
+      "}"
+    ],
+    "description": "Create main function"
+  },
+  "New Instance": {
+    "prefix": "new",
+    "body": [
+      "new ${1:Class}(${2:args})"
+    ],
+    "description": "Create a new instance"
+  },
+  "Property Access": {
+    "prefix": "prop",
+    "body": [
+      "${1:object}.${2:property}"
+    ],
+    "description": "Access a property"
+  },
+  "Method Call": {
+    "prefix": "method",
+    "body": [
+      "${1:object}.${2:method}(${3:args})"
+    ],
+    "description": "Call a method"
+  },
+  "Array": {
+    "prefix": "array",
+    "body": [
+      "[${1:items}]"
+    ],
+    "description": "Create an array"
+  },
+  "Object": {
+    "prefix": "object",
+    "body": [
+      "{ ${1:key}: ${2:value} }"
+    ],
+    "description": "Create an object"
+  },
+  "String Interpolation": {
+    "prefix": "interp",
+    "body": [
+      "\"${1:text} ${2:variable} ${3:text}\""
+    ],
+    "description": "Create a string interpolation"
+  },
+  "Null": {
+    "prefix": "null",
+    "body": [
+      "null"
+    ],
+    "description": "Insert null"
+  },
+  "True": {
+    "prefix": "true",
+    "body": [
+      "true"
+    ],
+    "description": "Insert true"
+  },
+  "False": {
+    "prefix": "false",
+    "body": [
+      "false"
+    ],
+    "description": "Insert false"
+  }
+}

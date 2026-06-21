@@ -1,0 +1,4 @@
+// Simple closure test
+let x = 10
+let add = y => x + y
+print add(5)

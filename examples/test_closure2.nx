@@ -1,0 +1,3 @@
+let multiplier = 3
+let multiply = x => x * multiplier
+print multiply(5)

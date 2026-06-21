@@ -1,0 +1,14 @@
+{
+  "name": "nexora-logger",
+  "version": "1.0.0",
+  "description": "Logging library for Nexora - structured logging with levels and transports",
+  "main": "index.nx",
+  "author": "Nexora Contributors",
+  "license": "MIT",
+  "repository": "https://github.com/opennexora/nexora-logger",
+  "keywords": ["logging", "logger", "debug", "info", "warn", "error"],
+  "dependencies": {},
+  "devDependencies": {
+    "nexora-test": "^1.0.0"
+  }
+}

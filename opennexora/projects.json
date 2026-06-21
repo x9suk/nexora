@@ -1,0 +1,253 @@
+{
+  "foundation": "OpenNexora Foundation",
+  "lastUpdated": "2026-06-21",
+  "projects": [
+    {
+      "id": "proj-001",
+      "name": "Nexora Runtime",
+      "slug": "nexora-runtime",
+      "description": "The core runtime environment for the Nexora programming language. Implements the language specification and provides the execution environment for Nexora applications.",
+      "category": "core",
+      "status": "active",
+      "maturity": "production",
+      "website": "https://nexora.dev/runtime",
+      "repository": "https://github.com/opennexora/nexora-runtime",
+      "documentation": "https://nexora.dev/docs/runtime",
+      "license": "MIT",
+      "version": "0.4.2",
+      "maintainers": [
+        {
+          "name": "Dr. Elena Rodriguez",
+          "role": "Lead Maintainer",
+          "github": "elena-rodriguez"
+        },
+        {
+          "name": "James Chen",
+          "role": "Core Maintainer",
+          "github": "james-chen"
+        }
+      ],
+      "tags": ["runtime", "core", "interpreter", "virtual-machine"],
+      "dependencies": [],
+      "featured": true,
+      "stars": 12450,
+      "forks": 892,
+      "openIssues": 45
+    },
+    {
+      "id": "proj-002",
+      "name": "nxm Package Manager",
+      "slug": "nxm",
+      "description": "The official package manager for Nexora. Handles package installation, dependency resolution, and publishing to the Nexora package registry.",
+      "category": "tooling",
+      "status": "active",
+      "maturity": "production",
+      "website": "https://nexora.dev/nxm",
+      "repository": "https://github.com/opennexora/nxm",
+      "documentation": "https://nexora.dev/docs/nxm",
+      "license": "MIT",
+      "version": "1.2.0",
+      "maintainers": [
+        {
+          "name": "Sarah Kim",
+          "role": "Lead Maintainer",
+          "github": "sarah-kim"
+        },
+        {
+          "name": "Alex Thompson",
+          "role": "Core Maintainer",
+          "github": "alex-thompson"
+        }
+      ],
+      "tags": ["package-manager", "cli", "dependencies", "registry"],
+      "dependencies": ["nexora-runtime"],
+      "featured": true,
+      "stars": 8750,
+      "forks": 654,
+      "openIssues": 32
+    },
+    {
+      "id": "proj-003",
+      "name": "nexora.dev Website",
+      "slug": "nexora.dev",
+      "description": "The official website for the Nexora programming language. Contains documentation, tutorials, blog posts, and community resources.",
+      "category": "documentation",
+      "status": "active",
+      "maturity": "production",
+      "website": "https://nexora.dev",
+      "repository": "https://github.com/opennexora/nexora.dev",
+      "documentation": "https://nexora.dev/contribute",
+      "license": "MIT",
+      "version": "2.1.0",
+      "maintainers": [
+        {
+          "name": "Maria Garcia",
+          "role": "Lead Maintainer",
+          "github": "maria-garcia"
+        },
+        {
+          "name": "David Park",
+          "role": "Core Maintainer",
+          "github": "david-park"
+        }
+      ],
+      "tags": ["website", "documentation", "tutorials", "community"],
+      "dependencies": [],
+      "featured": true,
+      "stars": 3200,
+      "forks": 1200,
+      "openIssues": 18
+    },
+    {
+      "id": "proj-004",
+      "name": "VS Code Extension",
+      "slug": "vscode-nexora",
+      "description": "Official Visual Studio Code extension for Nexora development. Provides syntax highlighting, code completion, debugging, and other IDE features.",
+      "category": "tools",
+      "status": "active",
+      "maturity": "stable",
+      "website": "https://marketplace.visualstudio.com/items?itemName=OpenNexora.nexora",
+      "repository": "https://github.com/opennexora/vscode-nexora",
+      "documentation": "https://nexora.dev/docs/vscode",
+      "license": "MIT",
+      "version": "0.9.1",
+      "maintainers": [
+        {
+          "name": "Prof. Liu Wei",
+          "role": "Lead Maintainer",
+          "github": "liu-wei"
+        },
+        {
+          "name": "Dr. Marcus Johnson",
+          "role": "Core Maintainer",
+          "github": "marcus-johnson"
+        }
+      ],
+      "tags": ["vscode", "ide", "extension", "syntax-highlighting", "debugger"],
+      "dependencies": ["nexora-runtime"],
+      "featured": true,
+      "stars": 5600,
+      "forks": 420,
+      "openIssues": 28
+    },
+    {
+      "id": "proj-005",
+      "name": "Nexora Standard Library",
+      "slug": "nexora-stdlib",
+      "description": "The official standard library for Nexora. Provides common utilities, data structures, and functionality for Nexora applications.",
+      "category": "library",
+      "status": "active",
+      "maturity": "stable",
+      "website": "https://nexora.dev/stdlib",
+      "repository": "https://github.com/opennexora/nexora-stdlib",
+      "documentation": "https://nexora.dev/docs/stdlib",
+      "license": "MIT",
+      "version": "0.4.0",
+      "maintainers": [
+        {
+          "name": "Elena Rodriguez",
+          "role": "Lead Maintainer",
+          "github": "elena-rodriguez"
+        }
+      ],
+      "tags": ["standard-library", "utilities", "data-structures"],
+      "dependencies": ["nexora-runtime"],
+      "featured": false,
+      "stars": 4200,
+      "forks": 310,
+      "openIssues": 15
+    },
+    {
+      "id": "proj-006",
+      "name": "Nexora Language Server",
+      "slug": "nexora-lsp",
+      "description": "Language Server Protocol implementation for Nexora. Provides IDE features like autocomplete, go-to-definition, and diagnostics.",
+      "category": "tools",
+      "status": "active",
+      "maturity": "beta",
+      "website": "https://nexora.dev/lsp",
+      "repository": "https://github.com/opennexora/nexora-lsp",
+      "documentation": "https://nexora.dev/docs/lsp",
+      "license": "MIT",
+      "version": "0.3.0",
+      "maintainers": [
+        {
+          "name": "James Chen",
+          "role": "Lead Maintainer",
+          "github": "james-chen"
+        }
+      ],
+      "tags": ["lsp", "language-server", "ide", "autocomplete"],
+      "dependencies": ["nexora-runtime"],
+      "featured": false,
+      "stars": 2800,
+      "forks": 180,
+      "openIssues": 42
+    },
+    {
+      "id": "proj-007",
+      "name": "Nexora Test Framework",
+      "slug": "nexora-test",
+      "description": "Official testing framework for Nexora applications. Provides unit testing, integration testing, and end-to-end testing capabilities.",
+      "category": "testing",
+      "status": "active",
+      "maturity": "stable",
+      "website": "https://nexora.dev/test",
+      "repository": "https://github.com/opennexora/nexora-test",
+      "documentation": "https://nexora.dev/docs/testing",
+      "license": "MIT",
+      "version": "0.4.1",
+      "maintainers": [
+        {
+          "name": "Sarah Kim",
+          "role": "Lead Maintainer",
+          "github": "sarah-kim"
+        }
+      ],
+      "tags": ["testing", "framework", "unit-tests", "integration-tests"],
+      "dependencies": ["nexora-runtime"],
+      "featured": false,
+      "stars": 3100,
+      "forks": 240,
+      "openIssues": 22
+    },
+    {
+      "id": "proj-008",
+      "name": "Nexora Compiler",
+      "slug": "nexora-compiler",
+      "description": "Ahead-of-time compiler for Nexora. Compiles Nexora code to optimized machine code for better performance.",
+      "category": "core",
+      "status": "active",
+      "maturity": "alpha",
+      "website": "https://nexora.dev/compiler",
+      "repository": "https://github.com/opennexora/nexora-compiler",
+      "documentation": "https://nexora.dev/docs/compiler",
+      "license": "MIT",
+      "version": "0.1.0",
+      "maintainers": [
+        {
+          "name": "Dr. Marcus Johnson",
+          "role": "Lead Maintainer",
+          "github": "marcus-johnson"
+        }
+      ],
+      "tags": ["compiler", "aot", "optimization", "performance"],
+      "dependencies": ["nexora-runtime"],
+      "featured": false,
+      "stars": 1800,
+      "forks": 95,
+      "openIssues": 68
+    }
+  ],
+  "categories": {
+    "core": "Core language and runtime components",
+    "tooling": "Developer tools and utilities",
+    "documentation": "Documentation and educational resources",
+    "tools": "IDE integrations and development tools",
+    "library": "Libraries and packages",
+    "testing": "Testing frameworks and utilities"
+  },
+  "totalProjects": 8,
+  "activeProjects": 8,
+  "featuredProjects": 4
+}

@@ -1,0 +1,115 @@
+// Classes in Nexora
+
+// Basic class
+class Animal {
+    init(name, sound) {
+        this.name = name
+        this.sound = sound
+    }
+
+    speak() {
+        print this.name + " says " + this.sound
+    }
+}
+
+let dog = new Animal("Dog", "Woof")
+dog.speak()
+
+let cat = new Animal("Cat", "Meow")
+cat.speak()
+
+// Class with methods
+class Calculator {
+    init() {
+        this.result = 0
+    }
+
+    add(value) {
+        this.result += value
+        return this
+    }
+
+    subtract(value) {
+        this.result -= value
+        return this
+    }
+
+    getResult() {
+        return this.result
+    }
+}
+
+let calc = new Calculator()
+let result = calc.add(10).add(5).subtract(3).getResult()
+print "Calculator result: " + str(result)
+
+// Inheritance
+class Vehicle {
+    init(make, model, year) {
+        this.make = make
+        this.model = model
+        this.year = year
+    }
+
+    getInfo() {
+        return str(this.year) + " " + this.make + " " + this.model
+    }
+}
+
+class Car extends Vehicle {
+    init(make, model, year, doors) {
+        super(make, model, year)
+        this.doors = doors
+    }
+
+    getInfo() {
+        return super.getInfo() + " with " + str(this.doors) + " doors"
+    }
+}
+
+let car = new Car("Toyota", "Camry", 2024, 4)
+print "Car: " + car.getInfo()
+
+// Static-like methods (using class properties)
+class MathUtils {
+    PI = 3.14159
+    E = 2.71828
+}
+
+print "Pi: " + str(MathUtils.PI)
+print "E: " + str(MathUtils.E)
+
+// Encapsulation example
+class BankAccount {
+    init(owner, balance) {
+        this.owner = owner
+        this._balance = balance  // Convention: _ means private
+    }
+
+    getBalance() {
+        return this._balance
+    }
+
+    deposit(amount) {
+        if amount > 0 {
+            this._balance += amount
+            print "Deposited " + str(amount)
+        }
+    }
+
+    withdraw(amount) {
+        if amount > 0 && amount <= this._balance {
+            this._balance -= amount
+            print "Withdrew " + str(amount)
+        } else {
+            print "Invalid withdrawal"
+        }
+    }
+}
+
+let account = new BankAccount("Ashish", 1000)
+print "Balance: " + str(account.getBalance())
+account.deposit(500)
+print "Balance: " + str(account.getBalance())
+account.withdraw(200)
+print "Balance: " + str(account.getBalance())

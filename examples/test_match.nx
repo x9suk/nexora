@@ -1,0 +1,8 @@
+// Test match
+let day = "Monday"
+let type = match day {
+    "Monday" => "Weekday",
+    "Tuesday" => "Weekday",
+    _ => "Unknown"
+}
+print type

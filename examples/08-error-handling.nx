@@ -1,0 +1,77 @@
+// Error Handling in Nexora
+
+// Try-Catch
+print "Basic try-catch:"
+try {
+    let result = 10 / 0
+    print "Result: " + str(result)
+} catch (error) {
+    print "Error caught: " + error
+}
+
+// Try-Catch-Finally
+print "\nTry-catch-finally:"
+try {
+    let data = parseJSON("{ invalid json }")
+    print "Data: " + str(data)
+} catch (error) {
+    print "JSON parse error: " + error
+} finally {
+    print "Finally block executed"
+}
+
+// Custom errors
+func divide(a, b) {
+    if b == 0 {
+        throw "Division by zero error"
+    }
+    return a / b
+}
+
+try {
+    let result = divide(10, 0)
+    print "Result: " + str(result)
+} catch (error) {
+    print "Caught: " + error
+}
+
+try {
+    let result = divide(10, 2)
+    print "Result: " + str(result)
+} catch (error) {
+    print "Caught: " + error
+}
+
+// Nested try-catch
+print "\nNested try-catch:"
+try {
+    try {
+        throw "Inner error"
+    } catch (innerError) {
+        print "Inner catch: " + innerError
+        throw "Outer error"
+    }
+} catch (outerError) {
+    print "Outer catch: " + outerError
+}
+
+// Error handling in functions
+func riskyOperation(shouldFail) {
+    if shouldFail {
+        throw "Operation failed!"
+    }
+    return "Operation succeeded!"
+}
+
+// Using try-catch with function calls
+let outcomes = [true, false]
+for shouldFail in outcomes {
+    try {
+        let result = riskyOperation(shouldFail)
+        print result
+    } catch (error) {
+        print "Error: " + error
+    }
+}
+
+print "\nAll error handling examples completed!"

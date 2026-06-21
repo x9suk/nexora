@@ -1,0 +1,141 @@
+print "=== Nexora v0.2 - Feature Showcase ==="
+print ""
+
+// === CLASSES/OOP ===
+print "--- Classes ---"
+class Animal {
+    func init(name, sound) {
+        this.name = name
+        this.sound = sound
+    }
+    func speak() {
+        return this.name + " says " + this.sound
+    }
+    func info() {
+        return this.name + " (" + type_of(this) + ")"
+    }
+}
+
+class Dog {
+    func init(name) {
+        this.name = name
+        this.sound = "woof"
+    }
+    func speak() {
+        return this.name + " says " + this.sound
+    }
+    func fetch(item) {
+        return this.name + " fetches the " + item
+    }
+}
+
+let a = new Animal("Cat", "meow")
+print a.speak()
+print a.info()
+
+let d = new Dog("Rex")
+print d.speak()
+print d.fetch("ball")
+
+// === TRY/CATCH/FINALLY ===
+print ""
+print "--- Error Handling ---"
+try {
+    let result = 10 / 0
+    print "Result: " + str(result)
+} catch (e) {
+    print "Caught: " + e
+} finally {
+    print "Cleanup done"
+}
+
+try {
+    throw "Custom error!"
+} catch (e) {
+    print "Got: " + e
+}
+
+// === ASSERT ===
+print ""
+print "--- Assert ---"
+assert(1 + 1 == 2, "Math works!")
+assert("hello" != "world", "Strings differ")
+print "All asserts passed!"
+
+// === TEST ===
+print ""
+print "--- Testing ---"
+test "addition" {
+    assert(2 + 3 == 5)
+}
+test "string concat" {
+    assert("a" + "b" == "ab")
+}
+
+// === DATE/TIME ===
+print ""
+print "--- Date/Time ---"
+let t = now()
+print "Unix timestamp: " + str(t)
+let ts = timestamp()
+print "Precise time: " + str(ts)
+
+// === COLLECTION FUNCTIONS ===
+print ""
+print "--- Collections ---"
+let nums = [5, 3, 1, 4, 2]
+print "Original: " + str(nums)
+print "Sorted: " + str(sort(nums))
+print "Reversed: " + str(reverse(nums))
+print "Unique: " + str(unique([1, 1, 2, 3, 3]))
+print "Flatten: " + str(flatten([[1, 2], [3, 4], [5]]))
+
+// === MAP/FILTER/REDUCE ===
+let doubled = map([1, 2, 3, 4, 5], func(x) { return x * 2 })
+print "Doubled: " + str(doubled)
+
+let evens = filter([1, 2, 3, 4, 5, 6], func(x) { return x % 2 == 0 })
+print "Evens: " + str(evens)
+
+let sum = reduce([1, 2, 3, 4, 5], func(acc, x) { return acc + x }, 0)
+print "Sum: " + str(sum)
+
+// === KEY/VALUE FUNCTIONS ===
+let obj = { name: "Nexora", version: "0.2" }
+print "Keys: " + str(keys(obj))
+print "Values: " + str(values(obj))
+print "Entries: " + str(entries(obj))
+
+// === RANGE ===
+print ""
+print "--- Range ---"
+print "Range(5): " + str(range(5))
+print "Range(2, 8): " + str(range(2, 8))
+print "Range(0, 10, 2): " + str(range(0, 10, 2))
+
+// === ZIP ===
+print ""
+print "--- Zip ---"
+let zipped = zip([1, 2, 3], ["a", "b", "c"], [true, false, true])
+print "Zipped: " + str(zipped)
+
+// === ENV/EXEC ===
+print ""
+print "--- System ---"
+let home = env("USERPROFILE")
+print "USERPROFILE: " + str(home)
+let result = exec_command("echo Hello from Nexora")
+print "Stdout: " + result.stdout
+
+// === ANONYMOUS FUNCTIONS ===
+print ""
+print "--- Anonymous Functions ---"
+let add = func(a, b) { return a + b }
+print "5 + 3 = " + str(add(5, 3))
+
+let apply = func(f, x) { return f(x) }
+let double = func(x) { return x * 2 }
+print "Double 7 = " + str(apply(double, 7))
+
+print ""
+print "=== All features working! ==="

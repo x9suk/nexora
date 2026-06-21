@@ -1,0 +1,71 @@
+// Async/Await in Nexora
+
+// Async function
+async func fetchData(url) {
+    print "Fetching data from " + url + "..."
+    // Simulate async operation
+    let response = await http.get(url)
+    return response.json()
+}
+
+// Async function with error handling
+async func fetchUserData(userId) {
+    try {
+        let user = await fetchData("https://api.example.com/users/" + str(userId))
+        return user
+    } catch (error) {
+        print "Failed to fetch user: " + error
+        return null
+    }
+}
+
+// Parallel async operations
+async func fetchMultipleData() {
+    let urls = [
+        "https://api.example.com/data1",
+        "https://api.example.com/data2",
+        "https://api.example.com/data3"
+    ]
+    
+    let results = []
+    for url in urls {
+        let result = await fetchData(url)
+        push(results, result)
+    }
+    
+    return results
+}
+
+// Async with timeout
+async func fetchWithTimeout(url, timeout) {
+    try {
+        let result = await fetchData(url)
+        return result
+    } catch (error) {
+        if error.includes("timeout") {
+            print "Request timed out after " + str(timeout) + "ms"
+        }
+        throw error
+    }
+}
+
+// Usage examples
+print "Starting async operations..."
+
+// Sequential operations
+let user1 = await fetchUserData(1)
+let user2 = await fetchUserData(2)
+
+if user1 != null {
+    print "User 1: " + user1.name
+}
+
+if user2 != null {
+    print "User 2: " + user2.name
+}
+
+// Parallel operations
+let allData = await fetchMultipleData()
+print "Fetched " + str(len(allData)) + " items"
+
+print "Async operations completed!"

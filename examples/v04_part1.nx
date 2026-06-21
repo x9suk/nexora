@@ -1,0 +1,19 @@
+print "part1"
+let name: string = "Nexora"
+let version: int = 4
+let multiplier = 3
+let multiply = x => x * multiplier
+print "Closure test:", multiply(5)
+let counter = 0
+let increment = () => {
+    counter = counter + 1
+    return counter
+}
+print "Counter:", increment()
+let numbers = [1, 2, 3, 4, 5]
+let doubled = map(numbers, x => x * 2)
+print "Doubled:", doubled
+let evens = filter(numbers, x => x % 2 == 0)
+print "Evens:", evens
+let sum = reduce(numbers, (acc, x) => acc + x, 0)
+print "Sum:", sum

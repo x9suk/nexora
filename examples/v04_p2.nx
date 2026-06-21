@@ -1,0 +1,6 @@
+print "part1"
+let name: string = "Nexora"
+let version: int = 4
+let multiplier = 3
+let multiply = x => x * multiplier
+print "Closure test:", multiply(5)

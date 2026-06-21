@@ -1,0 +1,319 @@
+// Nexora Standard Library - Testing Module
+
+module testing
+
+// Test results storage
+let _results = []
+let _current_test = null
+let _before_all_hooks = []
+let _after_all_hooks = []
+let _before_each_hooks = []
+let _after_each_hooks = []
+
+// Test class
+class Test {
+    init(name: String, fn: func) {
+        this.name = name
+        this.fn = fn
+        this.passed = false
+        this.error = null
+        this.duration = 0
+    }
+
+    run() {
+        let start = time.now()
+        
+        try {
+            // Run before each hooks
+            for hook in _before_each_hooks {
+                hook()
+            }
+            
+            // Run test
+            this.fn()
+            
+            // Run after each hooks
+            for hook in _after_each_hooks {
+                hook()
+            }
+            
+            this.passed = true
+        } catch (error) {
+            this.error = error
+            this.passed = false
+        }
+        
+        this.duration = time.now() - start
+        _results.push(this)
+    }
+}
+
+// Test suite
+class TestSuite {
+    init(name: String) {
+        this.name = name
+        this.tests = []
+    }
+
+    test(name: String, fn: func) {
+        this.tests.push(new Test(name, fn))
+    }
+
+    beforeAll(fn: func) {
+        _before_all_hooks.push(fn)
+    }
+
+    afterAll(fn: func) {
+        _after_all_hooks.push(fn)
+    }
+
+    beforeEach(fn: func) {
+        _before_each_hooks.push(fn)
+    }
+
+    afterEach(fn: func) {
+        _after_each_hooks.push(fn)
+    }
+
+    run() {
+        print "Running test suite: " + this.name
+        print "=".repeat(40)
+        
+        // Run before all hooks
+        for hook in _before_all_hooks {
+            hook()
+        }
+        
+        // Run all tests
+        for test in this.tests {
+            test.run()
+            
+            if test.passed {
+                print "✓ " + test.name
+            } else {
+                print "✗ " + test.name
+                print "  Error: " + str(test.error)
+            }
+        }
+        
+        // Run after all hooks
+        for hook in _after_all_hooks {
+            hook()
+        }
+        
+        this.printResults()
+    }
+
+    printResults() {
+        let passed = _results.filter(func(r) => r.passed).length
+        let failed = _results.filter(func(r) => !r.passed).length
+        let total = _results.length
+        
+        print "\n" + "=".repeat(40)
+        print "Test Results:"
+        print "  Passed: " + str(passed)
+        print "  Failed: " + str(failed)
+        print "  Total:  " + str(total)
+        
+        if failed > 0 {
+            print "\nFailed tests:"
+            for result in _results {
+                if !result.passed {
+                    print "  - " + result.name + ": " + str(result.error)
+                }
+            }
+        }
+        
+        print "\n" + "=".repeat(40)
+        
+        if failed > 0 {
+            print "FAILED"
+            return false
+        } else {
+            print "PASSED"
+            return true
+        }
+    }
+}
+
+// Assertion functions
+func assert(condition: Bool, message: String = "Assertion failed") {
+    if !condition {
+        throw message
+    }
+}
+
+func assertEqual(actual: Any, expected: Any, message: String = "") {
+    if actual != expected {
+        let msg = message != "" ? message : "Expected " + str(expected) + ", got " + str(actual)
+        throw msg
+    }
+}
+
+func assertNotEqual(actual: Any, expected: Any, message: String = "") {
+    if actual == expected {
+        let msg = message != "" ? message : "Expected values to be different"
+        throw msg
+    }
+}
+
+func assertTrue(value: Bool, message: String = "Expected true") {
+    if !value {
+        throw message
+    }
+}
+
+func assertFalse(value: Bool, message: String = "Expected false") {
+    if value {
+        throw message
+    }
+}
+
+func assertNull(value: Any, message: String = "Expected null") {
+    if value != null {
+        throw message + ": got " + str(value)
+    }
+}
+
+func assertNotNull(value: Any, message: String = "Expected non-null value") {
+    if value == null {
+        throw message
+    }
+}
+
+func assertThrows(fn: func, message: String = "Expected function to throw") {
+    try {
+        fn()
+        throw message
+    } catch (error) {
+        // Expected
+    }
+}
+
+func assertArrayEqual(actual: [Any], expected: [Any], message: String = "") {
+    if len(actual) != len(expected) {
+        let msg = message != "" ? message : "Array lengths differ: " + str(len(actual)) + " vs " + str(len(expected))
+        throw msg
+    }
+    
+    for i in range(len(actual)) {
+        if actual[i] != expected[i] {
+            let msg = message != "" ? message : "Arrays differ at index " + str(i)
+            throw msg
+        }
+    }
+}
+
+func assertObjectEqual(actual: Object, expected: Object, message: String = "") {
+    let actualKeys = Object.keys(actual).sort()
+    let expectedKeys = Object.keys(expected).sort()
+    
+    if actualKeys != expectedKeys {
+        let msg = message != "" ? message : "Object keys differ"
+        throw msg
+    }
+    
+    for key in actualKeys {
+        if actual[key] != expected[key] {
+            let msg = message != "" ? message : "Objects differ at key '" + key + "'"
+            throw msg
+        }
+    }
+}
+
+// Describe block for organizing tests
+func describe(name: String, fn: func) {
+    print "\n" + name
+    fn()
+}
+
+// It block (alias for test)
+func it(name: String, fn: func) {
+    test(name, fn)
+}
+
+// Expect style assertions
+func expect(value: Any) -> ExpectChain {
+    return new ExpectChain(value)
+}
+
+class ExpectChain {
+    init(value: Any) {
+        this.value = value
+    }
+
+    toBe(expected: Any) {
+        assertEqual(this.value, expected)
+    }
+
+    toNotBe(expected: Any) {
+        assertNotEqual(this.value, expected)
+    }
+
+    toBeNull() {
+        assertNull(this.value)
+    }
+
+    toNotBeNull() {
+        assertNotNull(this.value)
+    }
+
+    toBeTruthy() {
+        assertTrue(this.value)
+    }
+
+    toBeFalsy() {
+        assertFalse(this.value)
+    }
+
+    toEqual(expected: Any) {
+        assertEqual(this.value, expected)
+    }
+
+    toContain(item: Any) {
+        if isinstance(this.value, Array) {
+            let found = false
+            for elem in this.value {
+                if elem == item {
+                    found = true
+                    break
+                }
+            }
+            if !found {
+                throw "Expected array to contain " + str(item)
+            }
+        } elif isinstance(this.value, String) {
+            if !this.value.includes(str(item)) {
+                throw "Expected string to contain " + str(item)
+            }
+        }
+    }
+
+    toHaveLength(length: Int) {
+        assertEqual(len(this.value), length)
+    }
+
+    toBeInstanceOf(type: String) {
+        if typeof(this.value) != type {
+            throw "Expected instance of " + type
+        }
+    }
+}
+
+export {
+    Test,
+    TestSuite,
+    assert,
+    assertEqual,
+    assertNotEqual,
+    assertTrue,
+    assertFalse,
+    assertNull,
+    assertNotNull,
+    assertThrows,
+    assertArrayEqual,
+    assertObjectEqual,
+    describe,
+    it,
+    expect
+}

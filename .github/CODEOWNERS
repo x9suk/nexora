@@ -1,0 +1,28 @@
+# Default owners for everything in the nexora repo
+# These owners will be automatically requested for review
+
+# Core runtime
+*                       @opennexora/core
+nexora-runtime/         @opennexora/core @opennexora/runtime
+
+# Package manager
+nxm/                    @opennexora/core @opennexora/package-manager
+
+# Website and docs
+nexora.dev/             @opennexora/web @opennexora/docs
+
+# VS Code extension
+nexora-vscode/          @opennexora/vscode
+
+# Community packages
+lodash-nx/              @opennexora/community
+express-nx/             @opennexora/community
+nexora-http/            @opennexora/core @opennexora/http
+nexora-test/            @opennexora/core @opennexora/testing
+
+# CI/CD and infrastructure
+.github/                @opennexora/core @opennexora/infra
+.github/workflows/      @opennexora/infra
+
+# Security related files
+SECURITY.md             @opennexora/security

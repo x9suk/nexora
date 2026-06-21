@@ -1,0 +1,256 @@
+/**
+ * express-nx - Web framework for Nexora
+ */
+
+import http from "http";
+import path from "path";
+import fs from "fs";
+
+class Router {
+  constructor() {
+    this.routes = [];
+    this.middlewares = [];
+  }
+
+  use(middleware) {
+    this.middlewares.push(middleware);
+    return this;
+  }
+
+  get(path, handler) {
+    this.routes.push({ method: "GET", path, handler });
+    return this;
+  }
+
+  post(path, handler) {
+    this.routes.push({ method: "POST", path, handler });
+    return this;
+  }
+
+  put(path, handler) {
+    this.routes.push({ method: "PUT", path, handler });
+    return this;
+  }
+
+  delete(path, handler) {
+    this.routes.push({ method: "DELETE", path, handler });
+    return this;
+  }
+
+  patch(path, handler) {
+    this.routes.push({ method: "PATCH", path, handler });
+    return this;
+  }
+
+  all(path, handler) {
+    this.routes.push({ method: "ALL", path, handler });
+    return this;
+  }
+
+  _matchRoute(method, url) {
+    for (let i = 0; i < this.routes.length; i++) {
+      const route = this.routes[i];
+      if (route.method !== "ALL" && route.method !== method) continue;
+
+      const params = this._matchPath(route.path, url);
+      if (params !== null) {
+        return { handler: route.handler, params };
+      }
+    }
+    return null;
+  }
+
+  _matchPath(routePath, url) {
+    const routeParts = routePath.split("/").filter(Boolean);
+    const urlParts = url.split("/").filter(Boolean);
+
+    if (routeParts.length !== urlParts.length) return null;
+
+    const params = {};
+    for (let i = 0; i < routeParts.length; i++) {
+      if (routeParts[i].startsWith(":")) {
+        params[routeParts[i].slice(1)] = decodeURIComponent(urlParts[i]);
+      } else if (routeParts[i] !== urlParts[i]) {
+        return null;
+      }
+    }
+    return params;
+  }
+}
+
+class Request {
+  constructor(req) {
+    this._req = req;
+    this.method = req.method;
+    this.url = req.url;
+    this.headers = req.headers;
+    this.params = {};
+    this.query = {};
+    this.body = null;
+  }
+}
+
+class Response {
+  constructor(res) {
+    this._res = res;
+    this._statusCode = 200;
+    this._headers = {};
+  }
+
+  status(code) {
+    this._statusCode = code;
+    return this;
+  }
+
+  set(key, value) {
+    this._headers[key] = value;
+    return this;
+  }
+
+  json(data) {
+    this._res.writeHead(this._statusCode, {
+      "Content-Type": "application/json",
+      ...this._headers,
+    });
+    this._res.end(JSON.stringify(data));
+  }
+
+  send(data) {
+    const contentType = typeof data === "string" ? "text/html" : "application/json";
+    this._res.writeHead(this._statusCode, {
+      "Content-Type": contentType,
+      ...this._headers,
+    });
+    this._res.end(typeof data === "string" ? data : JSON.stringify(data));
+  }
+
+  redirect(url) {
+    this._res.writeHead(302, { Location: url, ...this._headers });
+    this._res.end();
+  }
+
+  end(data) {
+    this._res.writeHead(this._statusCode, this._headers);
+    this._res.end(data);
+  }
+}
+
+function createApp() {
+  const router = new Router();
+  const globalMiddlewares = [];
+  const errorHandlers = [];
+
+  function app(req, res) {
+    const request = new Request(req);
+    const response = new Response(res);
+
+    const urlObj = new URL(req.url, `http://${req.headers.host}`);
+    request.path = urlObj.pathname;
+    request.query = Object.fromEntries(urlObj.searchParams);
+
+    const pipeline = [...globalMiddlewares];
+
+    const match = router._matchRoute(req.method, request.path);
+    if (match) {
+      request.params = match.params;
+      pipeline.push((req, res, next) => match.handler(req, res, next));
+    } else {
+      pipeline.push((req, res) => {
+        res.status(404).json({ error: "Not Found" });
+      });
+    }
+
+    let idx = 0;
+    function next() {
+      if (idx < pipeline.length) {
+        pipeline[idx++](request, response, next);
+      }
+    }
+    next();
+  }
+
+  app.use = function (middleware) {
+    globalMiddlewares.push(middleware);
+    return app;
+  };
+
+  app.get = router.get.bind(router);
+  app.post = router.post.bind(router);
+  app.put = router.put.bind(router);
+  app.delete = router.delete.bind(router);
+  app.patch = router.patch.bind(router);
+  app.all = router.all.bind(router);
+
+  app.listen = function (port, callback) {
+    const server = http.createServer(app);
+    return server.listen(port, callback);
+  };
+
+  app.router = router;
+  return app;
+}
+
+function json() {
+  return (req, res, next) => {
+    if (req.method === "POST" || req.method === "PUT" || req.method === "PATCH") {
+      let body = "";
+      req._req.on("data", (chunk) => {
+        body += chunk;
+      });
+      req._req.on("end", () => {
+        try {
+          req.body = JSON.parse(body);
+        } catch (e) {
+          req.body = null;
+        }
+        next();
+      });
+    } else {
+      next();
+    }
+  };
+}
+
+function staticFiles(root) {
+  return (req, res, next) => {
+    if (req.method !== "GET") return next();
+
+    const filePath = path.join(root, req.path);
+    const ext = path.extname(filePath);
+    const mimeTypes = {
+      ".html": "text/html",
+      ".css": "text/css",
+      ".js": "application/javascript",
+      ".json": "application/json",
+      ".png": "image/png",
+      ".jpg": "image/jpeg",
+      ".gif": "image/gif",
+      ".svg": "image/svg+xml",
+      ".txt": "text/plain",
+    };
+
+    fs.readFile(filePath, (err, data) => {
+      if (err) return next();
+      const contentType = mimeTypes[ext] || "application/octet-stream";
+      res._res.writeHead(200, { "Content-Type": contentType });
+      res._res.end(data);
+    });
+  };
+}
+
+function cors(options = {}) {
+  const { origin = "*", methods = "GET,HEAD,PUT,PATCH,POST,DELETE" } = options;
+
+  return (req, res, next) => {
+    res.set("Access-Control-Allow-Origin", origin);
+    res.set("Access-Control-Allow-Methods", methods);
+    res.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    if (req.method === "OPTIONS") {
+      return res.status(204).end();
+    }
+    next();
+  };
+}
+
+export { createApp, json, staticFiles, cors, Router };
+export default createApp;

@@ -1,0 +1,229 @@
+/**
+ * nexora-logger - Logging library for Nexora
+ */
+
+const LEVELS = {
+  debug: 0,
+  info: 1,
+  warn: 2,
+  error: 3,
+  silent: 4,
+};
+
+const COLORS = {
+  debug: "\x1b[36m", // cyan
+  info: "\x1b[32m",  // green
+  warn: "\x1b[33m",  // yellow
+  error: "\x1b[31m", // red
+  reset: "\x1b[0m",
+  dim: "\x1b[2m",
+  bold: "\x1b[1m",
+};
+
+function formatTimestamp(date) {
+  return date.toISOString();
+}
+
+function formatLevel(level) {
+  return level.toUpperCase().padEnd(5);
+}
+
+function formatMessage(level, message, data) {
+  const ts = formatTimestamp(new Date());
+  const lvl = formatLevel(level);
+  const color = COLORS[level] || "";
+
+  let output = `${COLORS.dim}${ts}${COLORS.reset} ${color}${lvl}${COLORS.reset} ${message}`;
+  if (data !== undefined) {
+    output += ` ${COLORS.dim}${JSON.stringify(data)}${COLORS.reset}`;
+  }
+  return output;
+}
+
+// Transports
+
+function consoleTransport(options = {}) {
+  return (entry) => {
+    const output = formatMessage(entry.level, entry.message, entry.data);
+    if (entry.level === "error") {
+      process.stderr.write(output + "\n");
+    } else {
+      process.stdout.write(output + "\n");
+    }
+  };
+}
+
+function fileTransport(filePath, options = {}) {
+  const fs = require("fs");
+  const stream = fs.createWriteStream(filePath, { flags: "a" });
+
+  return (entry) => {
+    const line = JSON.stringify({
+      timestamp: entry.timestamp,
+      level: entry.level,
+      message: entry.message,
+      data: entry.data,
+      ...entry.meta,
+    });
+    stream.write(line + "\n");
+  };
+}
+
+function jsonTransport(options = {}) {
+  return (entry) => {
+    const output = JSON.stringify({
+      timestamp: entry.timestamp,
+      level: entry.level,
+      message: entry.message,
+      ...entry.data,
+    });
+    process.stdout.write(output + "\n");
+  };
+}
+
+// Logger class
+
+class Logger {
+  constructor(options = {}) {
+    this.name = options.name || "app";
+    this.level = options.level || "info";
+    this.transports = options.transports || [consoleTransport()];
+    this.meta = options.meta || {};
+    this.children = {};
+  }
+
+  _shouldLog(level) {
+    return LEVELS[level] >= LEVELS[this.level];
+  }
+
+  _log(level, message, data) {
+    if (!this._shouldLog(level)) return;
+
+    const entry = {
+      timestamp: new Date().toISOString(),
+      level,
+      message,
+      data,
+      meta: { ...this.meta },
+    };
+
+    for (const transport of this.transports) {
+      transport(entry);
+    }
+  }
+
+  debug(message, data) {
+    this._log("debug", message, data);
+  }
+
+  info(message, data) {
+    this._log("info", message, data);
+  }
+
+  warn(message, data) {
+    this._log("warn", message, data);
+  }
+
+  error(message, data) {
+    this._log("error", message, data);
+  }
+
+  log(level, message, data) {
+    this._log(level, message, data);
+  }
+
+  child(name, meta = {}) {
+    if (!this.children[name]) {
+      this.children[name] = new Logger({
+        name: `${this.name}:${name}`,
+        level: this.level,
+        transports: this.transports,
+        meta: { ...this.meta, ...meta },
+      });
+    }
+    return this.children[name];
+  }
+
+  setLevel(level) {
+    this.level = level;
+    for (const child of Object.values(this.children)) {
+      child.setLevel(level);
+    }
+  }
+
+  addTransport(transport) {
+    this.transports.push(transport);
+    return this;
+  }
+
+  removeTransport(index) {
+    this.transports.splice(index, 1);
+    return this;
+  }
+
+  startTimer() {
+    const start = Date.now();
+    return {
+      end: (message) => {
+        const duration = Date.now() - start;
+        this.info(message || "Timer", { duration: `${duration}ms` });
+        return duration;
+      },
+    };
+  }
+
+  profile(label) {
+    const timers = {};
+
+    if (timers[label]) {
+      const duration = Date.now() - timers[label];
+      delete timers[label];
+      this.info(`${label}: ${duration}ms`);
+      return duration;
+    } else {
+      timers[label] = Date.now();
+      return () => {
+        const duration = Date.now() - timers[label];
+        delete timers[label];
+        this.info(`${label}: ${duration}ms`);
+        return duration;
+      };
+    }
+  }
+
+  withContext(context) {
+    const child = new Logger({
+      name: this.name,
+      level: this.level,
+      transports: this.transports,
+      meta: { ...this.meta, ...context },
+    });
+    return child;
+  }
+}
+
+// Default logger
+
+let defaultLogger = null;
+
+function getLogger(options) {
+  if (!defaultLogger) {
+    defaultLogger = new Logger(options);
+  }
+  return defaultLogger;
+}
+
+function createLogger(options) {
+  return new Logger(options);
+}
+
+export {
+  Logger,
+  createLogger,
+  getLogger,
+  consoleTransport,
+  fileTransport,
+  jsonTransport,
+  LEVELS,
+};
+export default { createLogger, getLogger, Logger };

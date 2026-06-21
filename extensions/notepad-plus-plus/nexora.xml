@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NotepadPlus>
+    <UserLang name="Nexora" ext="nx">
+        <Global>
+            <GroupName name="Comments" />
+            <GroupName name="Keywords" />
+            <GroupName name="Built-in Functions" />
+            <GroupName name="Operators" />
+            <GroupName name="Strings" />
+            <GroupName name="Numbers" />
+        </Global>
+        <KeywordMap name="Comments" />
+        <KeywordMap name="Keywords" />
+        <KeywordMap name="Built-in Functions" />
+        <KeywordMap name="Operators" />
+        <KeywordMap name="Strings" />
+        <KeywordMap name="Numbers" />
+        <Rules>
+            <Comment name="Comments" style="COMMENT" start="//" end="" startStyle="COMMENT" endStyle="COMMENT" />
+            <Comment name="Comments" style="COMMENT" start="/*" end="*/" startStyle="COMMENT" endStyle="COMMENT" />
+            <Keyword name="Keywords" style="KEYWORD" kwNum="0" />
+            <Keyword name="Built-in Functions" style="FUNCTION" kwNum="1" />
+            <Keyword name="Operators" style="OPERATOR" kwNum="2" />
+            <Keyword name="Strings" style="STRING" startStyle="STRING" endStyle="STRING" />
+            <Number name="Numbers" style="NUMBER" />
+        </Rules>
+        <Keywords name="Comments">0 1 2</Keywords>
+        <Keywords name="Keywords" content="let func return if else while for in break continue true false null import from class new this extends super try catch finally throw async await match type interface</Keywords>
+        <Keywords name="Built-in Functions" content="print input type_of str int float len push pop sort reverse unique flatten range zip keys values entries map filter reduce read_file write_file json_parse json_stringify http_get http_post sqrt pow abs floor ceil round min max random now timestamp exec_command sleep assert exists</Keywords>
+        <Keywords name="Operators" content="= + - * / % ** == != > < >= <= && || ! &amp; | ^ ~ << >> >>></Keywords>
+        <Keywords name="Strings" content="' '" />
+        <Keywords name="Numbers" content="0 1 2 3 4 5 6 7 8 9" />
+    </UserLang>
+</NotepadPlus>

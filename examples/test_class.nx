@@ -1,0 +1,10 @@
+class Animal {
+    func init(name) {
+        this.name = name
+    }
+    func speak() {
+        return this.name + " makes a sound"
+    }
+}
+let a = new Animal("Rex")
+print a.speak()

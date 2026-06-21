@@ -1,0 +1,14 @@
+{
+  "name": "express-nx",
+  "version": "1.0.0",
+  "description": "Web framework for Nexora - routing, middleware, and HTTP server",
+  "main": "index.nx",
+  "author": "Nexora Contributors",
+  "license": "MIT",
+  "repository": "https://github.com/opennexora/express-nx",
+  "keywords": ["web", "http", "server", "routing", "middleware", "express"],
+  "dependencies": {},
+  "devDependencies": {
+    "nexora-test": "^1.0.0"
+  }
+}

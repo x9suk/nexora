@@ -1,0 +1,8 @@
+let counter = 0
+let increment = func() {
+    counter = counter + 1
+    return counter
+}
+print increment()
+print increment()
+print increment()

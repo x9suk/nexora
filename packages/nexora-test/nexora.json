@@ -1,0 +1,12 @@
+{
+  "name": "nexora-test",
+  "version": "1.0.0",
+  "description": "Testing framework for Nexora - describe, it, expect, mock",
+  "main": "index.nx",
+  "author": "Nexora Contributors",
+  "license": "MIT",
+  "repository": "https://github.com/opennexora/nexora-test",
+  "keywords": ["testing", "test", "assert", "mock", "describe"],
+  "dependencies": {},
+  "devDependencies": {}
+}

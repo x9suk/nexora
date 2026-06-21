@@ -1,0 +1,43 @@
+<idea-plugin>
+    <id>com.nexora.language</id>
+    <name>Nexora Language Support</name>
+    <vendor email="team@nexora.dev" url="https://nexora.dev">Nexora Team</vendor>
+
+    <description><![CDATA[
+        Complete Nexora language support for IntelliJ IDEA and other JetBrains IDEs.
+        
+        Features:
+        <ul>
+            <li>Syntax highlighting for .nx files</li>
+            <li>Code completion</li>
+            <li>Structure view</li>
+            <li>Go to definition</li>
+            <li>Find usages</li>
+            <li>Refactoring support</li>
+        </ul>
+        
+        Nexora is a modern programming language with closures, pattern matching, classes, and more.
+    ]]></description>
+
+    <changeNotes><![CDATA[
+        Version 1.0.0:
+        - Initial release
+        - Syntax highlighting
+        - Code completion
+        - Structure view
+    ]]></changeNotes>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType
+            name="Nexora"
+            implementationClass="nexora.NexoraFileType"
+            language="Nexora"
+            extensions="nx"/>
+
+        <lang.syntaxHighlighter
+            language="Nexora"
+            implementationClass="nexora.NexoraSyntaxHighlighter"/>
+    </extensions>
+</idea-plugin>

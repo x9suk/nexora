@@ -1,0 +1,174 @@
+// gaming-nx: Unified gaming hub
+// Connect Minecraft, Steam, and Roblox in one bot
+
+import { Client as DiscordClient, Events, Intents, Embed } from "discord-nx"
+import { SteamClient } from "steam-nx"
+import { RobloxClient } from "roblox-nx"
+import { MojangAPI } from "minecraft-nx"
+
+// Initialize clients
+let discord = new DiscordClient({
+  token: process.env.DISCORD_TOKEN,
+  intents: Intents.GUILDS | Intents.GUILD_MESSAGES | Intents.MESSAGE_CONTENT,
+})
+
+let steam = new SteamClient(process.env.STEAM_API_KEY)
+let roblox = new RobloxClient()
+let mojang = new MojangAPI()
+
+// Command handler
+discord.on(Events.MESSAGE_CREATE, async (message) => {
+  if (message.author.bot) return
+  let content = message.content
+  let channelId = message.channel_id
+
+  // Minecraft commands
+  if (content.startsWith("!mc ")) {
+    let username = content.slice(4)
+    let player = await mojang.getPlayer(username)
+
+    if (!player) {
+      await discord.sendMessage(channelId, "Player not found!")
+      return
+    }
+
+    let profile = await mojang.getProfile(player.id)
+    let skin = await mojang.getSkin(player.id)
+
+    let embed = new Embed()
+      .setTitle("Minecraft: " + username)
+      .setColor(0x00ff00)
+      .addField("UUID", player.id, true)
+      .setThumbnail(skin ? skin.skin : null)
+      .setTimestamp()
+
+    await discord.sendMessage(channelId, "", { embed: embed })
+  }
+
+  // Steam commands
+  if (content.startsWith("!steam ")) {
+    let args = content.slice(6).split(" ")
+    let action = args[0]
+
+    // Steam profile
+    if (action === "profile") {
+      let steamId = args[1]
+      let users = await steam.getUserSummaries(steamId)
+
+      if (!users || users.length === 0) {
+        await discord.sendMessage(channelId, "User not found!")
+        return
+      }
+
+      let user = users[0]
+      let games = await steam.getOwnedGames(steamId)
+      let totalHours = Math.round(games.reduce((sum, g) => sum + g.playtime_forever, 0) / 60)
+
+      let embed = new Embed()
+        .setTitle("Steam: " + user.personaname)
+        .setColor(0x1b2838)
+        .addField("Games", "" + games.length, true)
+        .addField("Total Playtime", totalHours + " hours", true)
+        .setThumbnail(user.avatarfull)
+        .setURL(user.profileurl)
+        .setTimestamp()
+
+      await discord.sendMessage(channelId, "", { embed: embed })
+    }
+
+    // Steam game info
+    if (action === "game") {
+      let appId = args[1]
+      let game = await steam.getAppDetails(appId)
+
+      if (!game) {
+        await discord.sendMessage(channelId, "Game not found!")
+        return
+      }
+
+      let embed = new Embed()
+        .setTitle(game.name)
+        .setColor(0x1b2838)
+        .setDescription(game.short_description)
+        .addField("Price", game.price_overview ? game.price_overview.final_formatted : "Free", true)
+        .addField("Rating", game.metacritic ? "" + game.metacritic.score + "/100" : "N/A", true)
+        .setImage(game.header_image)
+        .setTimestamp()
+
+      await discord.sendMessage(channelId, "", { embed: embed })
+    }
+  }
+
+  // Roblox commands
+  if (content.startsWith("!roblox ")) {
+    let args = content.slice(8).split(" ")
+    let action = args[0]
+
+    // Roblox profile
+    if (action === "profile") {
+      let username = args[1]
+      let userId = await client.getUserId(username)
+
+      if (!userId) {
+        await discord.sendMessage(channelId, "User not found!")
+        return
+      }
+
+      let user = await client.getUser(userId)
+      let groups = await client.getGroups(userId)
+      let friends = await client.getFriends(userId)
+
+      let embed = new Embed()
+        .setTitle("Roblox: " + user.name)
+        .setColor(0xe2231a)
+        .addField("Display Name", user.displayName, true)
+        .addField("Friends", "" + friends.length, true)
+        .addField("Groups", "" + groups.length, true)
+        .setThumbnail(client.getAvatarUrl(userId))
+        .setURL(user.getProfileUrl())
+        .setTimestamp()
+
+      await discord.sendMessage(channelId, "", { embed: embed })
+    }
+
+    // Roblox game
+    if (action === "game") {
+      let gameId = args[1]
+      let game = await client.getGame(gameId)
+
+      if (!game) {
+        await discord.sendMessage(channelId, "Game not found!")
+        return
+      }
+
+      let embed = new Embed()
+        .setTitle(game.name)
+        .setColor(0xe2231a)
+        .setDescription(game.description)
+        .addField("Playing", "" + game.playing, true)
+        .addField("Visits", "" + game.visitorCount, true)
+        .addField("Rating", game.getVotePercentage() + "%", true)
+        .setURL(game.getGameUrl())
+        .setTimestamp()
+
+      await discord.sendMessage(channelId, "", { embed: embed })
+    }
+  }
+
+  // Gaming stats command
+  if (content === "!gaming") {
+    let embed = new Embed()
+      .setTitle("Gaming Hub Commands")
+      .setColor(0xff9900)
+      .addField("!mc <username>", "Minecraft player info")
+      .addField("!steam profile <id>", "Steam profile stats")
+      .addField("!steam game <id>", "Steam game info")
+      .addField("!roblox profile <name>", "Roblox profile stats")
+      .addField("!roblox game <id>", "Roblox game info")
+      .setTimestamp()
+
+    await discord.sendMessage(channelId, "", { embed: embed })
+  }
+})
+
+await discord.login()

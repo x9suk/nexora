@@ -1,0 +1,16 @@
+{
+  "iconDefinitions": {
+    "_file_nx": {
+      "iconPath": "./nx.svg"
+    }
+  },
+  "fileExtensions": {
+    "nx": "_file_nx"
+  },
+  "fileNames": {
+    "nexora.toml": "_file_nx"
+  },
+  "languageIds": {
+    "nexora": "_file_nx"
+  }
+}

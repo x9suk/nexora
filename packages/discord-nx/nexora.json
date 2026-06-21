@@ -1,0 +1,12 @@
+{
+  "name": "discord-nx",
+  "version": "1.0.0",
+  "description": "Discord bot framework for Nexora",
+  "author": "Nexora Community",
+  "license": "MIT",
+  "keywords": ["discord", "bot", "api", "webhook"],
+  "dependencies": {},
+  "scripts": {
+    "test": "nexora run test/test.nx"
+  }
+}

@@ -1,0 +1,28 @@
+// Variables and Data Types in Nexora
+
+// String
+let name = "Nexora"
+print "Language: " + name
+
+// Numbers
+let age = 1
+let pi = 3.14159
+print "Version: " + str(age)
+print "Pi: " + str(pi)
+
+// Boolean
+let isAwesome = true
+print "Is awesome: " + str(isAwesome)
+
+// Null
+let nothing = null
+print "Nothing: " + str(nothing)
+
+// Constants
+const MAX_SIZE = 100
+print "Max size: " + str(MAX_SIZE)
+
+// Type checking
+print "Name type: " + typeof(name)
+print "Age type: " + typeof(age)
+print "Pi type: " + typeof(pi)

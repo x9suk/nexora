@@ -1,0 +1,9 @@
+// 8. Try/Catch/Finally
+try {
+    let result = 10 / 0
+    print "Result:", result
+} catch (e) {
+    print "Caught error:", e
+} finally {
+    print "Finally block executed"
+}

@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Playground - Nexora</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+  <style>
+    .playground-header {
+      padding: 100px 0 20px;
+      text-align: center;
+    }
+    
+    .playground-container {
+      padding: 0 20px 40px;
+      height: calc(100vh - 200px);
+    }
+    
+    .editor-panel,
+    .output-panel {
+      height: 100%;
+    }
+    
+    .examples-dropdown {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 16px;
+      color: var(--text-primary);
+      font-size: 0.875rem;
+      cursor: pointer;
+      margin-left: auto;
+    }
+    
+    .examples-dropdown:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    
+    .panel-header {
+      gap: 12px;
+    }
+    
+    .panel-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    
+    .output-line {
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    .output-line.error {
+      color: #f87171;
+    }
+    
+    .output-line.success {
+      color: #34d399;
+    }
+    
+    .output-line.info {
+      color: #60a5fa;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="logo">
+        <img src="logo.svg" alt="Nexora">
+        Nexora
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="docs.html">Documentation</a></li>
+        <li><a href="packages.html">Packages</a></li>
+        <li><a href="playground.html" class="active">Playground</a></li>
+      </ul>
+      <a href="docs.html" class="nav-cta">Get Started</a>
+      <button class="mobile-menu-btn">☰</button>
+    </div>
+  </nav>
+
+  <!-- Playground Header -->
+  <div class="playground-header">
+    <h1>Code Playground</h1>
+    <p>Write and test Nexora code right in your browser</p>
+  </div>
+
+  <!-- Playground Layout -->
+  <div class="container playground-container">
+    <div class="playground-layout">
+      <!-- Editor Panel -->
+      <div class="editor-panel">
+        <div class="panel-header">
+          <span class="panel-title">📝 Editor</span>
+          <div class="panel-controls">
+            <select class="examples-dropdown" id="exampleSelect">
+              <option value="hello">Hello World</option>
+              <option value="functions">Functions</option>
+              <option value="arrays">Arrays</option>
+              <option value="classes">Classes</option>
+              <option value="http">HTTP Server</option>
+            </select>
+            <button class="run-btn" id="runBtn">▶ Run</button>
+          </div>
+        </div>
+        <textarea class="code-editor" id="codeEditor" spellcheck="false">// Hello World in Nexora
+print("Hello, World!")
+
+// Variables
+let name = "Nexora"
+let version = 1.0
+
+// String interpolation
+print("Welcome to ${name} v${version}")
+
+// Simple function
+func greet(name: String): String {
+  return "Hello, ${name}!"
+}
+
+print(greet("Developer"))
+
+// Array operations
+let languages = ["Nexora", "JavaScript", "Python", "Rust"]
+print("Languages: ${languages}")
+
+// Filter and map
+let filtered = languages.filter(lang => lang.startsWith("N"))
+print("Starting with N: ${filtered}")</textarea>
+      </div>
+
+      <!-- Output Panel -->
+      <div class="output-panel">
+        <div class="panel-header">
+          <span class="panel-title">📤 Output</span>
+          <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;" id="clearBtn">Clear</button>
+        </div>
+        <div class="output-content" id="outputContent">
+          <div class="output-line info">Click "Run" to execute your code...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer" style="margin-top: auto;">
+    <div class="container">
+      <div class="footer-bottom" style="border-top: none; padding-top: 0;">
+        <p>© 2026 Nexora. All rights reserved.</p>
+        <div class="social-links">
+          <a href="#" title="GitHub">⌘</a>
+          <a href="#" title="Discord">◈</a>
+          <a href="#" title="Twitter">◉</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+  <script>
+    // Example code snippets
+    const examples = {
+      hello: `// Hello World in Nexora
+print("Hello, World!")
+
+// Variables
+let name = "Nexora"
+let version = 1.0
+
+// String interpolation
+print("Welcome to \${name} v\${version}")
+
+// Simple function
+func greet(name: String): String {
+  return "Hello, \${name}!"
+}
+
+print(greet("Developer"))
+
+// Array operations
+let languages = ["Nexora", "JavaScript", "Python", "Rust"]
+print("Languages: \${languages}")
+
+// Filter and map
+let filtered = languages.filter(lang => lang.startsWith("N"))
+print("Starting with N: \${filtered}")`,
+      
+      functions: `// Functions in Nexora
+
+// Basic function
+func add(a: Int, b: Int): Int {
+  return a + b
+}
+
+print("5 + 3 = \${add(5, 3)}")
+
+// Arrow function
+const multiply = (a: Int, b: Int): Int => a * b
+
+print("4 * 2 = \${multiply(4, 2)}")
+
+// Default parameters
+func greet(name: String = "World"): String {
+  return "Hello, \${name}!"
+}
+
+print(greet())
+print(greet("Nexora"))
+
+// Higher-order functions
+func applyTwice(x: Int, fn: (Int) => Int): Int {
+  return fn(fn(x))
+}
+
+let result = applyTwice(3, x => x * 2)
+print("Apply twice: \${result}")`,
+      
+      arrays: `// Arrays in Nexora
+
+let fruits = ["apple", "banana", "cherry", "date"]
+print("Fruits: \${fruits}")
+
+// Access elements
+print("First: \${fruits[0]}")
+print("Last: \${fruits[-1]}")
+
+// Array methods
+fruits.push("elderberry")
+print("After push: \${fruits}")
+
+// Map
+let uppercased = fruits.map(f => f.toUpperCase())
+print("Uppercased: \${uppercased}")
+
+// Filter
+let short = fruits.filter(f => f.length <= 6)
+print("Short names: \${short}")
+
+// Reduce
+let lengths = [5, 3, 7, 2, 8]
+let totalLength = lengths.reduce(0, (acc, len) => acc + len)
+print("Total length: \${totalLength}")
+
+// Destructuring
+let [first, second, ...rest] = fruits
+print("First: \${first}, Second: \${second}")
+print("Rest: \${rest}")`,
+      
+      classes: `// Classes in Nexora
+
+class Animal {
+  name: String
+  sound: String
+
+  constructor(name: String, sound: String) {
+    this.name = name
+    this.sound = sound
+  }
+
+  speak(): String {
+    return "\${this.name} says \${this.sound}!"
+  }
+}
+
+class Dog extends Animal {
+  constructor(name: String) {
+    super(name, "Woof")
+  }
+
+  fetch(item: String): String {
+    return "\${this.name} fetches the \${item}"
+  }
+}
+
+// Usage
+let dog = new Dog("Rex")
+print(dog.speak())
+print(dog.fetch("ball"))
+
+// Static methods
+class MathUtils {
+  static square(x: Int): Int {
+    return x * x
+  }
+
+  static cube(x: Int): Int {
+    return x * x * x
+  }
+}
+
+print("5 squared: \${MathUtils.square(5)}")
+print("3 cubed: \${MathUtils.cube(3)}")`,
+      
+      http: `// HTTP Server in Nexora
+import { createServer } from "http"
+
+// Create server
+let server = createServer((req, res) => {
+  let path = req.path
+  
+  if (path == "/") {
+    res.send("Welcome to Nexora!")
+  } else if (path == "/api/hello") {
+    res.json({ message: "Hello, API!" })
+  } else {
+    res.status(404).send("Not Found")
+  }
+})
+
+// Start server
+server.listen(3000, () => {
+  print("Server running on http://localhost:3000")
+  print("Endpoints:")
+  print("  GET / - Welcome message")
+  print("  GET /api/hello - JSON response")
+})
+
+// Note: This is a simulation of the HTTP module
+// In a real Nexora environment, this would start an actual server`
+    };
+
+    // Example selector
+    const exampleSelect = document.getElementById('exampleSelect');
+    const codeEditor = document.getElementById('codeEditor');
+    const runBtn = document.getElementById('runBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const outputContent = document.getElementById('outputContent');
+
+    if (exampleSelect && codeEditor) {
+      exampleSelect.addEventListener('change', (e) => {
+        codeEditor.value = examples[e.target.value];
+      });
+    }
+
+    if (clearBtn && outputContent) {
+      clearBtn.addEventListener('click', () => {
+        outputContent.innerHTML = '';
+      });
+    }
+
+    if (runBtn && codeEditor && outputContent) {
+      runBtn.addEventListener('click', () => {
+        const code = codeEditor.value;
+        outputContent.innerHTML = '';
+        
+        // Add running message
+        const runningLine = document.createElement('div');
+        runningLine.className = 'output-line info';
+        runningLine.textContent = '▶ Running...';
+        outputContent.appendChild(runningLine);
+        
+        // Simulate execution delay
+        setTimeout(() => {
+          outputContent.innerHTML = '';
+          simulateExecution(code);
+        }, 500);
+      });
+    }
+
+    function simulateExecution(code) {
+      const lines = code.split('\n');
+      const variables = {};
+      
+      lines.forEach(line => {
+        line = line.trim();
+        
+        // Skip empty lines, comments, and non-print statements
+        if (!line || line.startsWith('//') || !line.includes('print(')) {
+          // Track variable assignments for reference
+          const varMatch = line.match(/(?:let|const)\s+(\w+)\s*=\s*(.+)/);
+          if (varMatch) {
+            variables[varMatch[1]] = evaluateExpression(varMatch[2], variables);
+          }
+          return;
+        }
+        
+        // Handle print statements
+        const printMatch = line.match(/print\((.+)\)/);
+        if (printMatch) {
+          let content = evaluateExpression(printMatch[1], variables);
+          addOutput(content, 'success');
+        }
+      });
+      
+      if (outputContent.children.length === 0) {
+        addOutput('// Program executed successfully', 'info');
+      }
+    }
+
+    function evaluateExpression(expr, variables) {
+      // Handle string literals
+      if ((expr.startsWith('"') && expr.endsWith('"')) || 
+          (expr.startsWith("'") && expr.endsWith("'"))) {
+        return expr.slice(1, -1);
+      }
+      
+      // Handle string interpolation
+      if (expr.includes('${')) {
+        let result = expr;
+        const regex = /\$\{([^}]+)\}/g;
+        result = result.replace(regex, (match, varName) => {
+          if (variables[varName] !== undefined) {
+            return variables[varName];
+          }
+          return match;
+        });
+        // Remove outer quotes if present
+        if ((result.startsWith('"') && result.endsWith('"')) || 
+            (result.startsWith("'") && result.endsWith("'"))) {
+          result = result.slice(1, -1);
+        }
+        return result;
+      }
+      
+      // Handle numbers
+      if (!isNaN(expr)) {
+        return expr;
+      }
+      
+      // Handle array literals
+      if (expr.startsWith('[') && expr.endsWith(']')) {
+        return expr;
+      }
+      
+      // Handle function calls (simplified)
+      if (expr.includes('(')) {
+        const funcName = expr.split('(')[0];
+        if (funcName === 'Math.random()') {
+          return Math.random().toFixed(2);
+        }
+        // Return a placeholder for other function calls
+        return `[Function: ${funcName}]`;
+      }
+      
+      // Variable reference
+      if (variables[expr] !== undefined) {
+        return variables[expr];
+      }
+      
+      return expr;
+    }
+
+    function addOutput(text, type = '') {
+      const line = document.createElement('div');
+      line.className = `output-line ${type}`;
+      line.textContent = text;
+      outputContent.appendChild(line);
+    }
+
+    // Keyboard shortcut: Ctrl+Enter to run
+    codeEditor.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.key === 'Enter') {
+        e.preventDefault();
+        runBtn.click();
+      }
+    });
+  </script>
+</body>
+</html>

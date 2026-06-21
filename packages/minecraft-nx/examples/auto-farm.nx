@@ -1,0 +1,68 @@
+// minecraft-nx: Auto-farm bot
+// Automatically farms crops in a Minecraft server
+
+import { Bot, Position, Blocks, Items, Mobs } from "../src/index.nx"
+
+let bot = new Bot({
+  username: "NexoraFarmer",
+  host: "localhost",
+  port: 25565,
+  version: "1.20.4",
+})
+
+// Crop blocks to farm
+let crops = [
+  Blocks.WHEAT,
+  Blocks.CARROTS,
+  Blocks.POTATOES,
+  Blocks.BEETROOTS,
+]
+
+// Farm settings
+let farmRadius = 10
+let harvestDelay = 1000 // ms between harvests
+
+bot.on("spawn", async () => {
+  console.log("[Farmer] Bot spawned! Starting auto-farm...")
+
+  while (true) {
+    // Find nearby crops
+    for (let crop of crops) {
+      let block = await bot.findBlock(crop, farmRadius)
+      if (block) {
+        console.log("[Farmer] Found " + crop + " at " + block.x + ", " + block.y + ", " + block.z)
+
+        // Move to crop
+        await bot.goto(block.x, block.y, block.z)
+
+        // Dig crop
+        await bot.digBlock(block.x, block.y, block.z)
+
+        // Wait for harvest
+        await bot.sleep(harvestDelay)
+
+        // Replant
+        let seed = getSeedForCrop(crop)
+        if (seed && await bot.hasItem(seed)) {
+          await bot.placeBlock(block.x, block.y, block.z, seed)
+          console.log("[Farmer] Replanted " + crop)
+        }
+      }
+    }
+
+    // Wait before next scan
+    await bot.sleep(5000)
+  }
+})
+
+function getSeedForCrop(crop) {
+  switch (crop) {
+    case Blocks.WHEAT: return Items.WHEAT_SEEDS
+    case Blocks.CARROTS: return Items.CARROT
+    case Blocks.POTATOES: return Items.POTATO
+    case Blocks.BEETROOTS: return Items.BEETROOT_SEEDS
+    default: return null
+  }
+}
+
+await bot.connect()

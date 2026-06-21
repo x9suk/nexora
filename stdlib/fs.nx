@@ -1,0 +1,121 @@
+// Nexora Standard Library - File System Module
+
+module fs
+
+// Read entire file
+func read(path: String) -> String {
+    // Implementation in Rust runtime
+    return __internal_fs_read(path)
+}
+
+// Read file as bytes
+func readBytes(path: String) -> [Int] {
+    return __internal_fs_read_bytes(path)
+}
+
+// Write to file
+func write(path: String, content: String) -> Bool {
+    return __internal_fs_write(path, content)
+}
+
+// Append to file
+func append(path: String, content: String) -> Bool {
+    return __internal_fs_append(path, content)
+}
+
+// Check if file exists
+func exists(path: String) -> Bool {
+    return __internal_fs_exists(path)
+}
+
+// Delete file
+func delete(path: String) -> Bool {
+    return __internal_fs_delete(path)
+}
+
+// Create directory
+func mkdir(path: String) -> Bool {
+    return __internal_fs_mkdir(path)
+}
+
+// Create directories recursively
+func mkdirAll(path: String) -> Bool {
+    return __internal_fs_mkdir_all(path)
+}
+
+// List directory contents
+func readDir(path: String) -> [String] {
+    return __internal_fs_read_dir(path)
+}
+
+// Get file info
+func stat(path: String) -> Object {
+    return __internal_fs_stat(path)
+}
+
+// Copy file
+func copy(src: String, dst: String) -> Bool {
+    return __internal_fs_copy(src, dst)
+}
+
+// Move/rename file
+func move(src: String, dst: String) -> Bool {
+    return __internal_fs_move(src, dst)
+}
+
+// Get file extension
+func ext(path: String) -> String {
+    let parts = split(path, ".")
+    if len(parts) > 1 {
+        return parts[len(parts) - 1]
+    }
+    return ""
+}
+
+// Get filename from path
+func basename(path: String) -> String {
+    let parts = split(path, "/")
+    if len(parts) > 0 {
+        return parts[len(parts) - 1]
+    }
+    return path
+}
+
+// Get directory from path
+func dirname(path: String) -> String {
+    let parts = split(path, "/")
+    if len(parts) > 1 {
+        return join(parts[0:len(parts) - 1], "/")
+    }
+    return "."
+}
+
+// Join path components
+func join(...parts: String) -> String {
+    return __internal_fs_join(parts)
+}
+
+// Watch file changes
+func watch(path: String, callback: func) -> Object {
+    return __internal_fs_watch(path, callback)
+}
+
+export {
+    read,
+    readBytes,
+    write,
+    append,
+    exists,
+    delete,
+    mkdir,
+    mkdirAll,
+    readDir,
+    stat,
+    copy,
+    move,
+    ext,
+    basename,
+    dirname,
+    join,
+    watch
+}

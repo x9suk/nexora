@@ -1,0 +1,8 @@
+{
+  "name": "roblox-nx",
+  "version": "1.0.0",
+  "description": "Roblox API integration for Nexora",
+  "author": "Nexora Community",
+  "license": "MIT",
+  "keywords": ["roblox", "game", "api", "luau"]
+}

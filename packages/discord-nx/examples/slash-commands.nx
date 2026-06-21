@@ -1,0 +1,213 @@
+// discord-nx: Slash Commands Example
+// Bot with slash commands, buttons, and select menus
+
+import { Client, Embed, ActionRow, ButtonStyles, Events, Intents, SlashCommand, OptionTypes, ResponseTypes } from "../src/index.nx"
+
+let client = new Client({
+  token: process.env.DISCORD_TOKEN,
+  intents: Intents.GUILDS | Intents.GUILD_MESSAGES | Intents.MESSAGE_CONTENT,
+})
+
+// Define slash commands
+let pingCmd = new SlashCommand("ping", "Check bot latency")
+  .build()
+
+let greetCmd = new SlashCommand("greet", "Greet a user")
+  .addOption({
+    name: "user",
+    description: "User to greet",
+    type: OptionTypes.USER,
+    required: true,
+  })
+  .addOption({
+    name: "message",
+    description: "Custom greeting message",
+    type: OptionTypes.STRING,
+    required: false,
+  })
+  .build()
+
+let embedCmd = new SlashCommand("embed", "Create a rich embed")
+  .addOption({
+    name: "title",
+    description: "Embed title",
+    type: OptionTypes.STRING,
+    required: true,
+  })
+  .addOption({
+    name: "description",
+    description: "Embed description",
+    type: OptionTypes.STRING,
+    required: true,
+  })
+  .addOption({
+    name: "color",
+    description: "Hex color (e.g. 0xff0000)",
+    type: OptionTypes.STRING,
+    required: false,
+  })
+  .build()
+
+let pollCmd = new SlashCommand("poll", "Create a poll")
+  .addOption({
+    name: "question",
+    description: "Poll question",
+    type: OptionTypes.STRING,
+    required: true,
+  })
+  .addOption({
+    name: "options",
+    description: "Options separated by comma",
+    type: OptionTypes.STRING,
+    required: true,
+  })
+  .build()
+
+console.log("[Bot] Slash commands registered")
+
+// Handle ready
+client.on(Events.READY, (data) => {
+  console.log("[Bot] Logged in as " + data.user.username)
+})
+
+// Handle interactions
+client.on(Events.INTERACTION_CREATE, async (interaction) => {
+  let { id, token, type, data, member } = interaction
+
+  // Handle slash commands
+  if (type === InteractionTypes.APPLICATION_COMMAND) {
+    let commandName = data.name
+
+    // Ping command
+    if (commandName === "ping") {
+      let embed = new Embed()
+        .setTitle("Pong!")
+        .setDescription("Latency: " + Date.now() + "ms")
+        .setColor(0x00ff00)
+
+      await client.respondInteraction(id, token, {
+        type: ResponseTypes.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: { embeds: [embed.build()] },
+      })
+    }
+
+    // Greet command
+    if (commandName === "greet") {
+      let user = data.options.find(o => o.name === "user")
+      let message = data.options.find(o => o.name === "message")
+      let greeting = message ? message.value : "Hello!"
+
+      let embed = new Embed()
+        .setTitle("Greeting!")
+        .setDescription(greeting)
+        .setColor(0x00ffff)
+        .setAuthor(member.user.username, null, member.user.avatar)
+
+      // Add buttons
+      let row = new ActionRow()
+        .addButton({
+          style: ButtonStyles.SUCCESS,
+          label: "Hello!",
+          customId: "greet_hello_" + member.user.id,
+        })
+        .addButton({
+          style: ButtonStyles.PRIMARY,
+          label: "Goodbye!",
+          customId: "greet_bye_" + member.user.id,
+        })
+
+      await client.respondInteraction(id, token, {
+        type: ResponseTypes.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          content: "<@" + user.value + ">",
+          embeds: [embed.build()],
+          components: [row.build()],
+        },
+      })
+    }
+
+    // Embed command
+    if (commandName === "embed") {
+      let title = data.options.find(o => o.name === "title").value
+      let description = data.options.find(o => o.name === "description").value
+      let colorOption = data.options.find(o => o.name === "color")
+      let color = colorOption ? parseInt(colorOption.value) : 0x0099ff
+
+      let embed = new Embed()
+        .setTitle(title)
+        .setDescription(description)
+        .setColor(color)
+        .setTimestamp()
+
+      await client.respondInteraction(id, token, {
+        type: ResponseTypes.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: { embeds: [embed.build()] },
+      })
+    }
+
+    // Poll command
+    if (commandName === "poll") {
+      let question = data.options.find(o => o.name === "question").value
+      let optionsStr = data.options.find(o => o.name === "options").value
+      let options = optionsStr.split(",").map(o => o.trim())
+
+      let description = ""
+      let emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+      for (let i = 0; i < options.length; i++) {
+        description += emojis[i] + " " + options[i] + "\n"
+      }
+
+      let embed = new Embed()
+        .setTitle("📊 " + question)
+        .setDescription(description)
+        .setColor(0xff9900)
+        .setFooter("Poll by " + member.user.username)
+        .setTimestamp()
+
+      let response = await client.respondInteraction(id, token, {
+        type: ResponseTypes.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: { embeds: [embed.build()] },
+      })
+
+      // Add reactions
+      let messageId = response.id
+      for (let i = 0; i < options.length; i++) {
+        await client.addReaction(interaction.channel_id, messageId, emojis[i])
+      }
+    }
+  }
+
+  // Handle button clicks
+  if (type === InteractionTypes.MESSAGE_COMPONENT) {
+    let customId = data.custom_id
+
+    if (customId.startsWith("greet_hello_")) {
+      let userId = customId.split("_")[2]
+      await client.respondInteraction(id, token, {
+        type: ResponseTypes.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: { content: "Hello there! 👋" },
+      })
+    }
+
+    if (customId.startsWith("greet_bye_")) {
+      let userId = customId.split("_")[2]
+      await client.respondInteraction(id, token, {
+        type: ResponseTypes.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: { content: "Goodbye! See you later! 👋" },
+      })
+    }
+  }
+})
+
+// Handle messages for prefix commands
+client.on(Events.MESSAGE_CREATE, async (message) => {
+  if (message.author.bot) return
+
+  // Register slash commands
+  if (message.content === "!register") {
+    // In real impl, use REST to register commands with Discord
+    await client.sendMessage(message.channel_id, "Slash commands registered! Try /ping, /greet, /embed, /poll")
+  }
+})
+
+await client.login()

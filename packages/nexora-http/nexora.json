@@ -1,0 +1,14 @@
+{
+  "name": "nexora-http",
+  "version": "1.0.0",
+  "description": "HTTP client for Nexora - request/response with interceptors",
+  "main": "index.nx",
+  "author": "Nexora Contributors",
+  "license": "MIT",
+  "repository": "https://github.com/opennexora/nexora-http",
+  "keywords": ["http", "client", "request", "api", "fetch"],
+  "dependencies": {},
+  "devDependencies": {
+    "nexora-test": "^1.0.0"
+  }
+}

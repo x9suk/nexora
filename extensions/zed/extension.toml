@@ -1,0 +1,12 @@
+[package]
+name = "nexora"
+version = "1.0.0"
+authors = ["Nexora Team"]
+description = "Complete Nexora language support for Zed - syntax highlighting, snippets, and more"
+repository = "https://github.com/nexora-lang/zed-nexora"
+license = "MIT"
+keywords = ["nexora", "nx", "programming language"]
+
+[grammars.nexora]
+repository = "https://github.com/nexora-lang/tree-sitter-nexora"
+commit = "main"

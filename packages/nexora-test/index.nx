@@ -1,0 +1,336 @@
+/**
+ * nexora-test - Testing framework for Nexora
+ */
+
+let currentSuite = null;
+const suites = [];
+const beforeAllHooks = [];
+const afterAllHooks = [];
+
+function describe(name, fn) {
+  const suite = {
+    name,
+    tests: [],
+    beforeEach: [],
+    afterEach: [],
+  };
+  suites.push(suite);
+
+  const prev = currentSuite;
+  currentSuite = suite;
+  fn();
+  currentSuite = prev;
+}
+
+function it(name, fn) {
+  if (!currentSuite) {
+    throw new Error("it() must be called inside describe()");
+  }
+  currentSuite.tests.push({ name, fn });
+}
+
+function before(fn) {
+  if (currentSuite) {
+    currentSuite.beforeEach.push(fn);
+  } else {
+    beforeAllHooks.push(fn);
+  }
+}
+
+function after(fn) {
+  if (currentSuite) {
+    currentSuite.afterEach.push(fn);
+  } else {
+    afterAllHooks.push(fn);
+  }
+}
+
+function beforeEach(fn) {
+  if (currentSuite) {
+    currentSuite.beforeEach.push(fn);
+  }
+}
+
+function afterEach(fn) {
+  if (currentSuite) {
+    currentSuite.afterEach.push(fn);
+  }
+}
+
+// Expectation class
+
+class Expect {
+  constructor(value) {
+    this.value = value;
+    this.not = false;
+  }
+
+  get isNot() {
+    const exp = new Expect(this.value);
+    exp.not = !this.not;
+    return exp;
+  }
+
+  _assert(condition, message) {
+    if (this.not) condition = !condition;
+    if (!condition) {
+      throw new Error(
+        `Expected ${JSON.stringify(this.value)} ${this.not ? "not " : ""}${message}`
+      );
+    }
+  }
+
+  toBe(expected) {
+    this._assert(this.value === expected, `to be ${JSON.stringify(expected)}`);
+  }
+
+  toEqual(expected) {
+    const deepEqual = (a, b) => {
+      if (a === b) return true;
+      if (a === null || b === null) return false;
+      if (typeof a !== typeof b) return false;
+      if (typeof a !== "object") return a === b;
+      if (Array.isArray(a) !== Array.isArray(b)) return false;
+      if (Array.isArray(a)) {
+        if (a.length !== b.length) return false;
+        return a.every((item, i) => deepEqual(item, b[i]));
+      }
+      const keysA = Object.keys(a);
+      const keysB = Object.keys(b);
+      if (keysA.length !== keysB.length) return false;
+      return keysA.every((key) => deepEqual(a[key], b[key]));
+    };
+    this._assert(deepEqual(this.value, expected), `to deeply equal ${JSON.stringify(expected)}`);
+  }
+
+  toBeTruthy() {
+    this._assert(!!this.value, "to be truthy");
+  }
+
+  toBeFalsy() {
+    this._assert(!this.value, "to be falsy");
+  }
+
+  toBeUndefined() {
+    this._assert(this.value === undefined, "to be undefined");
+  }
+
+  toBeNull() {
+    this._assert(this.value === null, "to be null");
+  }
+
+  toBeInstanceOf(type) {
+    this._assert(this.value instanceof type, `to be instance of ${type.name}`);
+  }
+
+  toBeGreaterThan(expected) {
+    this._assert(this.value > expected, `to be greater than ${expected}`);
+  }
+
+  toBeLessThan(expected) {
+    this._assert(this.value < expected, `to be less than ${expected}`);
+  }
+
+  toContain(expected) {
+    if (typeof this.value === "string") {
+      this._assert(this.value.includes(expected), `to contain "${expected}"`);
+    } else if (Array.isArray(this.value)) {
+      this._assert(this.value.includes(expected), `to contain ${expected}`);
+    }
+  }
+
+  toHaveLength(expected) {
+    this._assert(this.value.length === expected, `to have length ${expected}`);
+  }
+
+  toThrow(expected) {
+    if (this.not) {
+      try {
+        this.value();
+      } catch (e) {
+        throw new Error(`Expected function not to throw, but it threw "${e.message}"`);
+      }
+      return;
+    }
+    let error;
+    try {
+      this.value();
+    } catch (e) {
+      error = e;
+    }
+    if (!error) {
+      throw new Error("Expected function to throw");
+    }
+    if (expected && error.message !== expected) {
+      throw new Error(`Expected error "${expected}", got "${error.message}"`);
+    }
+  }
+
+  toHaveBeenCalled() {
+    this._assert(this.value._called > 0, "to have been called");
+  }
+
+  toHaveBeenCalledTimes(n) {
+    this._assert(this.value._called === n, `to have been called ${n} times`);
+  }
+
+  toHaveBeenCalledWith(...args) {
+    const match = this.value._calls.some(
+      (call) => JSON.stringify(call) === JSON.stringify(args)
+    );
+    this._assert(match, `to have been called with ${JSON.stringify(args)}`);
+  }
+
+  toMatch(expected) {
+    this._assert(
+      new RegExp(expected).test(this.value),
+      `to match ${expected}`
+    );
+  }
+
+  toHaveProperty(key, value) {
+    this._assert(key in this.value, `to have property "${key}"`);
+    if (value !== undefined) {
+      this._assert(
+        this.value[key] === value,
+        `property "${key}" to be ${JSON.stringify(value)}`
+      );
+    }
+  }
+
+  toSatisfy(fn) {
+    this._assert(fn(this.value), "to satisfy the predicate");
+  }
+}
+
+function expect(value) {
+  return new Expect(value);
+}
+
+// Mock
+
+function mock(fn) {
+  const calls = [];
+  const mockFn = function (...args) {
+    mockFn._called++;
+    mockFn._calls.push(args);
+    if (fn) return fn(...args);
+  };
+  mockFn._called = 0;
+  mockFn._calls = calls;
+  mockFn.mockReturnValue = (val) => {
+    mockFn._returnValue = val;
+    return mockFn;
+  };
+  mockFn.mockImplementation = (impl) => {
+    fn = impl;
+    return mockFn;
+  };
+  mockFn.mockReset = () => {
+    mockFn._called = 0;
+    mockFn._calls = [];
+  };
+  return mockFn;
+}
+
+function spy(obj, method) {
+  const original = obj[method];
+  const calls = [];
+  const spyFn = function (...args) {
+    spyFn._called++;
+    spyFn._calls.push(args);
+    return original.apply(this, args);
+  };
+  spyFn._called = 0;
+  spyFn._calls = calls;
+  spyFn.mockRestore = () => {
+    obj[method] = original;
+  };
+  obj[method] = spyFn;
+  return spyFn;
+}
+
+// Assertion functions
+
+function assert(condition, message) {
+  if (!condition) {
+    throw new Error(message || "Assertion failed");
+  }
+}
+
+assert.equal = (actual, expected, message) => {
+  if (actual !== expected) {
+    throw new Error(
+      message || `Expected ${expected}, got ${actual}`
+    );
+  }
+};
+
+assert.deepEqual = (actual, expected, message) => {
+  const exp = expect(actual);
+  exp.toEqual(expected);
+};
+
+assert.throws = (fn, message) => {
+  expect(fn).toThrow(message);
+};
+
+assert.ok = (value, message) => {
+  if (!value) {
+    throw new Error(message || `Expected truthy, got ${value}`);
+  }
+};
+
+// Test runner
+
+async function run() {
+  let passed = 0;
+  let failed = 0;
+  const results = [];
+
+  for (const hook of beforeAllHooks) {
+    await hook();
+  }
+
+  for (const suite of suites) {
+    console.log(`\n  ${suite.name}`);
+
+    for (const test of suite.tests) {
+      try {
+        for (const hook of suite.beforeEach) {
+          await hook();
+        }
+
+        await test.fn();
+        passed++;
+        console.log(`    ✓ ${test.name}`);
+        results.push({ suite: suite.name, test: test.name, status: "pass" });
+      } catch (err) {
+        failed++;
+        console.log(`    ✗ ${test.name}`);
+        console.log(`      ${err.message}`);
+        results.push({
+          suite: suite.name,
+          test: test.name,
+          status: "fail",
+          error: err.message,
+        });
+      }
+
+      for (const hook of suite.afterEach) {
+        await hook();
+      }
+    }
+  }
+
+  for (const hook of afterAllHooks) {
+    await hook();
+  }
+
+  console.log(`\n  ${passed} passed, ${failed} failed\n`);
+
+  return { passed, failed, results };
+}
+
+export { describe, it, before, after, beforeEach, afterEach, expect, mock, spy, assert, run };
+export default { describe, it, before, after, expect, mock, spy, assert, run };

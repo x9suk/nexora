@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documentation - Nexora</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="logo">
+        <img src="logo.svg" alt="Nexora">
+        Nexora
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="docs.html" class="active">Documentation</a></li>
+        <li><a href="packages.html">Packages</a></li>
+        <li><a href="playground.html">Playground</a></li>
+      </ul>
+      <a href="docs.html" class="nav-cta">Get Started</a>
+      <button class="mobile-menu-btn">☰</button>
+    </div>
+  </nav>
+
+  <!-- Docs Layout -->
+  <div class="container">
+    <div class="docs-layout">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-section">
+          <h4>Introduction</h4>
+          <ul class="sidebar-links">
+            <li><a href="#getting-started" class="active">Getting Started</a></li>
+            <li><a href="#installation">Installation</a></li>
+            <li><a href="#hello-world">Hello World</a></li>
+          </ul>
+        </div>
+
+        <div class="sidebar-section">
+          <h4>Core Concepts</h4>
+          <ul class="sidebar-links">
+            <li><a href="#variables">Variables</a></li>
+            <li><a href="#functions">Functions</a></li>
+            <li><a href="#arrays">Arrays</a></li>
+            <li><a href="#objects">Objects</a></li>
+            <li><a href="#classes">Classes</a></li>
+            <li><a href="#modules">Modules</a></li>
+          </ul>
+        </div>
+
+        <div class="sidebar-section">
+          <h4>Advanced</h4>
+          <ul class="sidebar-links">
+            <li><a href="#error-handling">Error Handling</a></li>
+            <li><a href="#async">Async/Await</a></li>
+            <li><a href="#generics">Generics</a></li>
+          </ul>
+        </div>
+
+        <div class="sidebar-section">
+          <h4>Reference</h4>
+          <ul class="sidebar-links">
+            <li><a href="#standard-library">Standard Library</a></li>
+            <li><a href="#api-reference">API Reference</a></li>
+          </ul>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="docs-content">
+        <h1>Documentation</h1>
+        <p>Complete guide to the Nexora programming language</p>
+
+        <!-- Getting Started -->
+        <section id="getting-started">
+          <h2>Getting Started</h2>
+          <p>Welcome to Nexora! This guide will help you get up and running quickly.</p>
+          
+          <h3 id="installation">Installation</h3>
+          <p>Install Nexora using your platform's package manager:</p>
+          
+          <pre><code># Windows (PowerShell)
+irm https://raw.githubusercontent.com/nexora-lang/nexora/main/install.ps1 | iex
+
+# macOS / Linux
+curl -fsSL https://raw.githubusercontent.com/nexora-lang/nexora/main/install.sh | sh</code></pre>
+
+          <p>Or install manually from GitHub releases:</p>
+          <pre><code># Download from: https://github.com/nexora-lang/nexora/releases</code></pre>
+
+          <p>Verify your installation:</p>
+          <pre><code>nexora --version
+# Output: Nexora 1.0.0</code></pre>
+        </section>
+
+        <!-- Hello World -->
+        <section id="hello-world">
+          <h2 id="hello-world-title">Hello World</h2>
+          <p>Create your first Nexora program:</p>
+          
+          <pre><code>// hello.nex
+print("Hello, World!")</code></pre>
+
+          <p>Run it with:</p>
+          <pre><code>nexora run hello.nex</code></pre>
+        </section>
+
+        <!-- Variables -->
+        <section id="variables">
+          <h2>Variables</h2>
+          <p>Nexora uses <code>let</code> for mutable variables and <code>const</code> for constants.</p>
+
+          <pre><code>// Variable declarations
+let name = "Nexora"
+let age = 1
+const PI = 3.14159
+
+// Type annotations
+let count: Int = 42
+let message: String = "Hello"
+let active: Bool = true
+
+// Type inference
+let inferred = 100  // Type is inferred as Int</code></pre>
+
+          <h3>Data Types</h3>
+          <table class="api-table">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Description</th>
+                <th>Example</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>Int</code></td>
+                <td>Integer numbers</td>
+                <td><code>42</code></td>
+              </tr>
+              <tr>
+                <td><code>Float</code></td>
+                <td>Floating-point numbers</td>
+                <td><code>3.14</code></td>
+              </tr>
+              <tr>
+                <td><code>String</code></td>
+                <td>Text strings</td>
+                <td><code>"Hello"</code></td>
+              </tr>
+              <tr>
+                <td><code>Bool</code></td>
+                <td>Boolean values</td>
+                <td><code>true</code> / <code>false</code></td>
+              </tr>
+              <tr>
+                <td><code>Array</code></td>
+                <td>Ordered collections</td>
+                <td><code>[1, 2, 3]</code></td>
+              </tr>
+              <tr>
+                <td><code>Object</code></td>
+                <td>Key-value pairs</td>
+                <td><code>{ key: "value" }</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- Functions -->
+        <section id="functions">
+          <h2>Functions</h2>
+          <p>Functions in Nexora are first-class citizens.</p>
+
+          <pre><code>// Function declaration
+func add(a: Int, b: Int): Int {
+  return a + b
+}
+
+// Arrow function (single expression)
+func multiply = (a: Int, b: Int): Int => a * b
+
+// Calling functions
+let sum = add(5, 3)       // 8
+let product = multiply(4, 2)  // 8
+
+// Default parameters
+func greet(name: String = "World"): String {
+  return "Hello, ${name}!"
+}
+
+greet()          // "Hello, World!"
+greet("Nexora")  // "Hello, Nexora!"</code></pre>
+
+          <h3>Higher-Order Functions</h3>
+          <pre><code>let numbers = [1, 2, 3, 4, 5]
+
+// Map
+let doubled = numbers.map(n => n * 2)
+// [2, 4, 6, 8, 10]
+
+// Filter
+let evens = numbers.filter(n => n % 2 == 0)
+// [2, 4]
+
+// Reduce
+let sum = numbers.reduce(0, (acc, n) => acc + n)
+// 15</code></pre>
+        </section>
+
+        <!-- Arrays -->
+        <section id="arrays">
+          <h2>Arrays</h2>
+          <p>Arrays are ordered, mutable collections.</p>
+
+          <pre><code>// Array declaration
+let fruits = ["apple", "banana", "cherry"]
+let numbers: Int[] = [1, 2, 3, 4, 5]
+
+// Access elements
+let first = fruits[0]   // "apple"
+let last = fruits[-1]   // "cherry"
+
+// Array methods
+fruits.push("date")
+fruits.remove("banana")
+fruits.includes("apple")  // true
+fruits.length             // 3
+
+// Spread operator
+let moreFruits = [...fruits, "elderberry"]
+
+// Destructuring
+let [a, b, ...rest] = [1, 2, 3, 4, 5]
+// a = 1, b = 2, rest = [3, 4, 5]</code></pre>
+        </section>
+
+        <!-- Objects -->
+        <section id="objects">
+          <h2>Objects</h2>
+          <p>Objects store key-value pairs.</p>
+
+          <pre><code>// Object declaration
+let user = {
+  name: "Alice",
+  age: 30,
+  email: "alice@example.com"
+}
+
+// Access properties
+let name = user.name       // "Alice"
+let age = user["age"]      // 30
+
+// Add/modify properties
+user.role = "admin"
+user.age = 31
+
+// Object methods
+let person = {
+  name: "Bob",
+  greet(): String {
+    return "Hi, I'm ${this.name}"
+  }
+}
+
+person.greet()  // "Hi, I'm Bob"
+
+// Spread
+let updated = { ...user, role: "superadmin" }
+
+// Destructuring
+let { name: userName, age: userAge } = user</code></pre>
+        </section>
+
+        <!-- Classes -->
+        <section id="classes">
+          <h2>Classes</h2>
+          <p>Nexora supports object-oriented programming with classes.</p>
+
+          <pre><code>// Class declaration
+class Animal {
+  name: String
+  sound: String
+
+  constructor(name: String, sound: String) {
+    this.name = name
+    this.sound = sound
+  }
+
+  speak(): String {
+    return "${this.name} says ${this.sound}!"
+  }
+}
+
+// Inheritance
+class Dog extends Animal {
+  constructor(name: String) {
+    super(name, "Woof")
+  }
+
+  fetch(item: String): String {
+    return "${this.name} fetches the ${item}"
+  }
+}
+
+// Usage
+let dog = new Dog("Rex")
+dog.speak()      // "Rex says Woof!"
+dog.fetch("ball")  // "Rex fetches the ball"
+
+// Static methods
+class MathUtils {
+  static square(x: Int): Int {
+    return x * x
+  }
+}
+
+MathUtils.square(5)  // 25</code></pre>
+        </section>
+
+        <!-- Modules -->
+        <section id="modules">
+          <h2>Modules</h2>
+          <p>Organize your code with modules.</p>
+
+          <pre><code>// math.nex (module file)
+export func add(a: Int, b: Int): Int {
+  return a + b
+}
+
+export func subtract(a: Int, b: Int): Int {
+  return a - b
+}
+
+export const PI = 3.14159
+
+// main.nex (importing)
+import { add, subtract, PI } from "./math"
+import * as math from "./math"
+
+add(5, 3)        // 8
+math.PI          // 3.14159</code></pre>
+
+          <h3>Default Exports</h3>
+          <pre><code>// logger.nex
+export default func log(message: String): void {
+  print("[LOG] ${message}")
+}
+
+// main.nex
+import log from "./logger"
+log("Application started")</code></pre>
+        </section>
+
+        <!-- Error Handling -->
+        <section id="error-handling">
+          <h2>Error Handling</h2>
+          <p>Handle errors gracefully with try/catch.</p>
+
+          <pre><code>// Throwing errors
+func divide(a: Int, b: Int): Int {
+  if (b == 0) {
+    throw new Error("Division by zero")
+  }
+  return a / b
+}
+
+// Try/catch
+try {
+  let result = divide(10, 2)
+  print(result)  // 5
+} catch (err) {
+  print("Error: ${err.message}")
+}
+
+// Custom errors
+class ValidationError extends Error {
+  field: String
+
+  constructor(field: String, message: String) {
+    super(message)
+    this.field = field
+  }
+}
+
+func validateAge(age: Int): void {
+  if (age < 0) {
+    throw new ValidationError("age", "Age must be positive")
+  }
+}
+
+// Finally block
+try {
+  riskyOperation()
+} catch (err) {
+  handleError(err)
+} finally {
+  cleanup()
+}</code></pre>
+        </section>
+
+        <!-- Standard Library -->
+        <section id="standard-library">
+          <h2>Standard Library</h2>
+          <p>Nexora comes with a comprehensive standard library.</p>
+
+          <h3>Core Modules</h3>
+          <table class="api-table">
+            <thead>
+              <tr>
+                <th>Module</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>io</code></td>
+                <td>Input/output operations</td>
+              </tr>
+              <tr>
+                <td><code>fs</code></td>
+                <td>File system operations</td>
+              </tr>
+              <tr>
+                <td><code>http</code></td>
+                <td>HTTP client and server</td>
+              </tr>
+              <tr>
+                <td><code>json</code></td>
+                <td>JSON parsing and serialization</td>
+              </tr>
+              <tr>
+                <td><code>crypto</code></td>
+                <td>Cryptographic functions</td>
+              </tr>
+              <tr>
+                <td><code>math</code></td>
+                <td>Mathematical functions</td>
+              </tr>
+              <tr>
+                <td><code>date</code></td>
+                <td>Date and time utilities</td>
+              </tr>
+              <tr>
+                <td><code>path</code></td>
+                <td>File path utilities</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <pre><code>// File system example
+import { readFile, writeFile } from "fs"
+
+let content = await readFile("data.txt")
+await writeFile("output.txt", content)
+
+// HTTP server example
+import { createServer } from "http"
+
+let server = createServer((req, res) => {
+  res.send("Hello, World!")
+})
+
+server.listen(3000)</code></pre>
+        </section>
+
+        <!-- API Reference -->
+        <section id="api-reference">
+          <h2>API Reference</h2>
+          <p>Built-in functions and methods.</p>
+
+          <h3>Global Functions</h3>
+          <table class="api-table">
+            <thead>
+              <tr>
+                <th>Function</th>
+                <th>Description</th>
+                <th>Returns</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>print(...args)</code></td>
+                <td>Output to console</td>
+                <td><code>void</code></td>
+              </tr>
+              <tr>
+                <td><code>len(value)</code></td>
+                <td>Get length of string/array</td>
+                <td><code>Int</code></td>
+              </tr>
+              <tr>
+                <td><code>type(value)</code></td>
+                <td>Get type of value</td>
+                <td><code>String</code></td>
+              </tr>
+              <tr>
+                <td><code>toStr(value)</code></td>
+                <td>Convert to string</td>
+                <td><code>String</code></td>
+              </tr>
+              <tr>
+                <td><code>toInt(value)</code></td>
+                <td>Convert to integer</td>
+                <td><code>Int</code></td>
+              </tr>
+              <tr>
+                <td><code>toFloat(value)</code></td>
+                <td>Convert to float</td>
+                <td><code>Float</code></td>
+              </tr>
+              <tr>
+                <td><code>input(prompt)</code></td>
+                <td>Read user input</td>
+                <td><code>String</code></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>String Methods</h3>
+          <table class="api-table">
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>.length</code></td>
+                <td>Get string length</td>
+              </tr>
+              <tr>
+                <td><code>.toUpperCase()</code></td>
+                <td>Convert to uppercase</td>
+              </tr>
+              <tr>
+                <td><code>.toLowerCase()</code></td>
+                <td>Convert to lowercase</td>
+              </tr>
+              <tr>
+                <td><code>.trim()</code></td>
+                <td>Remove whitespace</td>
+              </tr>
+              <tr>
+                <td><code>.includes(sub)</code></td>
+                <td>Check if contains substring</td>
+              </tr>
+              <tr>
+                <td><code>.replace(old, new)</code></td>
+                <td>Replace occurrences</td>
+              </tr>
+              <tr>
+                <td><code>.split(delim)</code></td>
+                <td>Split into array</td>
+              </tr>
+              <tr>
+                <td><code>.startsWith(sub)</code></td>
+                <td>Check if starts with</td>
+              </tr>
+              <tr>
+                <td><code>.endsWith(sub)</code></td>
+                <td>Check if ends with</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Array Methods</h3>
+          <table class="api-table">
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>.length</code></td>
+                <td>Get array length</td>
+              </tr>
+              <tr>
+                <td><code>.push(item)</code></td>
+                <td>Add item to end</td>
+              </tr>
+              <tr>
+                <td><code>.pop()</code></td>
+                <td>Remove and return last item</td>
+              </tr>
+              <tr>
+                <td><code>.map(fn)</code></td>
+                <td>Transform each element</td>
+              </tr>
+              <tr>
+                <td><code>.filter(fn)</code></td>
+                <td>Keep matching elements</td>
+              </tr>
+              <tr>
+                <td><code>.reduce(fn, init)</code></td>
+                <td>Accumulate to single value</td>
+              </tr>
+              <tr>
+                <td><code>.find(fn)</code></td>
+                <td>Find first matching element</td>
+              </tr>
+              <tr>
+                <td><code>.includes(item)</code></td>
+                <td>Check if array contains item</td>
+              </tr>
+              <tr>
+                <td><code>.slice(start, end)</code></td>
+                <td>Extract portion of array</td>
+              </tr>
+              <tr>
+                <td><code>.sort()</code></td>
+                <td>Sort array in place</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <div style="margin-top: 60px; padding-top: 30px; border-top: 1px solid var(--border); text-align: center;">
+          <p style="color: var(--text-muted);">Next: <a href="packages.html">Package Manager →</a></p>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom" style="border-top: none; padding-top: 0;">
+        <p>© 2026 Nexora. All rights reserved.</p>
+        <div class="social-links">
+          <a href="#" title="GitHub">⌘</a>
+          <a href="#" title="Discord">◈</a>
+          <a href="#" title="Twitter">◉</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,436 @@
+// roblox-nx: Roblox API integration for Nexora
+// Users, games, assets, inventory, and more
+
+import { http } from "http"
+import { json } from "json"
+
+// ==================== Constants ====================
+
+const ROBLOX_API = "https://users.roblox.com"
+const ROBLOX_GAMES = "https://games.roblox.com"
+const ROBLOX_CATALOG = "https://catalog.roblox.com"
+const ROBLOX_THUMBNAILS = "https://thumbnails.roblox.com"
+const ROBLOX_ASSETS = "https://assetdelivery.roblox.com"
+const ROBLOX_INVENTORY = "https://inventory.roblox.com"
+const ROBLOX_TRADES = "https://trades.roblox.com"
+const ROBLOX_PRESENCE = "https://presence.roblox.com"
+const ROBLOX_GROUPS = "https://groups.roblox.com"
+const ROBLOX_ECONOMY = "https://economy.roblox.com"
+
+// ==================== Roblox Client ====================
+
+class RobloxClient {
+  cookie = ""
+
+  constructor(cookie = "") {
+    this.cookie = cookie
+  }
+
+  async request(url, options = {}) {
+    let headers = {
+      "Content-Type": "application/json",
+    }
+
+    if (this.cookie) {
+      headers["Cookie"] = ".ROBLOSECURITY=" + this.cookie
+    }
+
+    let response = await http.fetch(url, {
+      method: options.method || "GET",
+      headers: headers,
+      body: options.body ? json.stringify(options.body) : undefined,
+    })
+
+    return json.parse(response.body)
+  }
+
+  // ==================== User Methods ====================
+
+  async getUser(userId) {
+    let data = await this.request(ROBLOX_API + "/v1/users/" + userId)
+    return new RobloxUser(data)
+  }
+
+  async getUsers(userIds) {
+    let data = await this.request(ROBLOX_API + "/v1/users", {
+      method: "POST",
+      body: { userIds: userIds },
+    })
+    return data.data ? data.data.map(u => new RobloxUser(u)) : []
+  }
+
+  async searchUsers(query, limit = 10) {
+    let data = await this.request(ROBLOX_API + "/v1/users/search?keyword=" + encodeURIComponent(query) + "&limit=" + limit)
+    return data.data ? data.data.map(u => new RobloxUser(u)) : []
+  }
+
+  async getUserName(userId) {
+    let data = await this.request(ROBLOX_API + "/v1/users/" + userId + "/name")
+    return data.name
+  }
+
+  async getUserId(username) {
+    let data = await this.request(ROBLOX_API + "/v1/usernames/users", {
+      method: "POST",
+      body: { usernames: [username] },
+    })
+    return data.data && data.data.length > 0 ? data.data[0].id : null
+  }
+
+  async getProfile(userId) {
+    let data = await this.request(ROBLOX_API + "/v1/users/" + userId + "/profile")
+    return data
+  }
+
+  // ==================== Friend Methods ====================
+
+  async getFriends(userId) {
+    let data = await this.request(ROBLOX_API + "/v1/users/" + userId + "/friends")
+    return data.data ? data.data.map(u => new RobloxUser(u)) : []
+  }
+
+  async getFriendCount(userId) {
+    let data = await this.request(ROBLOX_API + "/v1/users/" + userId + "/friends/count")
+    return data.count
+  }
+
+  async getFollowers(userId, limit = 100) {
+    let data = await this.request(ROBLOX_API + "/v1/users/" + userId + "/followers?limit=" + limit)
+    return data.data ? data.data.map(u => new RobloxUser(u)) : []
+  }
+
+  async getFollowing(userId, limit = 100) {
+    let data = await this.request(ROBLOX_API + "/v1/users/" + userId + "/following?limit=" + limit)
+    return data.data ? data.data.map(u => new RobloxUser(u)) : []
+  }
+
+  // ==================== Game Methods ====================
+
+  async getGame(universeId) {
+    let data = await this.request(ROBLOX_GAMES + "/v1/games?universeIds=" + universeId)
+    return data.data && data.data.length > 0 ? new RobloxGame(data.data[0]) : null
+  }
+
+  async getGames(universeIds) {
+    let data = await this.request(ROBLOX_GAMES + "/v1/games?universeIds=" + universeIds.join(","))
+    return data.data ? data.data.map(g => new RobloxGame(g)) : []
+  }
+
+  async searchGames(query, limit = 10) {
+    let data = await this.request(ROBLOX_GAMES + "/v1/games/list?model.sortToken=&model.maxRows=" + limit + "&model.keyword=" + encodeURIComponent(query))
+    return data.data ? data.data.map(g => new RobloxGame(g)) : []
+  }
+
+  async getGameVotes(universeId) {
+    let data = await this.request(ROBLOX_GAMES + "/v1/games/" + universeId + "/votes")
+    return data
+  }
+
+  async getGameThumbnails(universeId) {
+    let data = await this.request(ROBLOX_THUMBNAILS + "/v1/games/icons?universeIds=" + universeId + "&returnPolicy=PlaceHolder&size=256x256&format=Png&isCircular=false")
+    return data.data ? data.data : []
+  }
+
+  async getGameServers(universeId, sortType = "Desc", limit = 10) {
+    let data = await this.request(ROBLOX_GAMES + "/v1/games/" + universeId + "/servers/Public?sortOrder=" + sortType + "&limit=" + limit)
+    return data.data ? data.data.map(s => new RobloxServer(s)) : []
+  }
+
+  // ==================== Asset Methods ====================
+
+  async getAsset(assetId) {
+    let data = await this.request(ROBLOX_CATALOG + "/v1/search/items?category=All&creatorTargetId=" + assetId)
+    return data
+  }
+
+  async getAssetInfo(assetId) {
+    let data = await this.request(ROBLOX_ASSETS + "/v1/assets/" + assetId + "/details")
+    return data
+  }
+
+  async getAssetVersions(assetId) {
+    let data = await this.request(ROBLOX_ASSETS + "/v1/assets/" + assetId + "/versions")
+    return data.data ? data.data : []
+  }
+
+  // ==================== Inventory Methods ====================
+
+  async getInventory(userId, assetType = "Asset", sortOrder = "Asc", limit = 100, cursor = "") {
+    let data = await this.request(ROBLOX_INVENTORY + "/v2/users/" + userId + "/assets/collectibles?assetType=" + assetType + "&sortOrder=" + sortOrder + "&limit=" + limit + "&cursor=" + cursor)
+    return data
+  }
+
+  async getCollectibles(userId) {
+    let data = await this.request(ROBLOX_INVENTORY + "/v2/users/" + userId + "/assets/collectibles?sortOrder=Asc&limit=100")
+    return data.data ? data.data : []
+  }
+
+  async getBadges(userId, limit = 100) {
+    let data = await this.request(ROBLOX_INVENTORY + "/v1/users/" + userId + "/badges?limit=" + limit)
+    return data.data ? data.data : []
+  }
+
+  async getGroups(userId) {
+    let data = await this.request(ROBLOX_GROUPS + "/v2/users/" + userId + "/groups/roles")
+    return data.data ? data.data.map(g => new RobloxGroup(g)) : []
+  }
+
+  // ==================== Trade Methods ====================
+
+  async getTradeOffers(userId, status = "Inbound", limit = 100) {
+    let data = await this.request(ROBLOX_TRADES + "/v1/users/" + userId + "/trades/" + status + "?limit=" + limit)
+    return data.data ? data.data : []
+  }
+
+  // ==================== Presence Methods ====================
+
+  async getPresence(userId) {
+    let data = await this.request(ROBLOX_PRESENCE + "/v1/presence/users", {
+      method: "POST",
+      body: { userIds: [userId] },
+    })
+    return data.userPresences && data.userPresences.length > 0 ? data.userPresences[0] : null
+  }
+
+  async getPresences(userIds) {
+    let data = await this.request(ROBLOX_PRESENCE + "/v1/presence/users", {
+      method: "POST",
+      body: { userIds: userIds },
+    })
+    return data.userPresences || []
+  }
+
+  // ==================== Economy Methods ====================
+
+  async getCurrency(userId) {
+    let data = await this.request(ROBLOX_ECONOMY + "/v1/users/" + userId + "/currency")
+    return data
+  }
+
+  async getAssetPrice(assetId) {
+    let data = await this.request(ROBLOX_ECONOMY + "/v2/assets/" + assetId + "/details")
+    return data
+  }
+
+  // ==================== Thumbnail Methods ====================
+
+  async getAvatarThumbnail(userId, size = "150x150", format = "Png", isCircular = false) {
+    let data = await this.request(ROBLOX_THUMBNAILS + "/v1/users/avatar-headshot?userIds=" + userId + "&size=" + size + "&format=" + format + "&isCircular=" + isCircular)
+    return data.data && data.data.length > 0 ? data.data[0].imageUrl : null
+  }
+
+  async getAvatarThumbnails(userIds, size = "150x150", format = "Png") {
+    let data = await this.request(ROBLOX_THUMBNAILS + "/v1/users/avatar-headshot?userIds=" + userIds.join(",") + "&size=" + size + "&format=" + format)
+    return data.data || []
+  }
+
+  // ==================== Utility ====================
+
+  getGameUrl(universeId) {
+    return "https://www.roblox.com/games/" + universeId
+  }
+
+  getProfileUrl(userId) {
+    return "https://www.roblox.com/users/" + userId + "/profile"
+  }
+
+  getAvatarUrl(userId) {
+    return "https://www.roblox.com/headshot-thumbnail/image?userId=" + userId + "&width=420&height=420&format=png"
+  }
+}
+
+// ==================== Roblox User ====================
+
+class RobloxUser {
+  id = 0
+  name = ""
+  displayName = ""
+  description = ""
+  created = ""
+  isBanned = false
+  externalAppDisplayName = ""
+  hasVerifiedBadge = false
+
+  constructor(data) {
+    this.id = data.id
+    this.name = data.name
+    this.displayName = data.displayName
+    this.description = data.description || ""
+    this.created = data.created || ""
+    this.isBanned = data.isBanned || false
+    this.externalAppDisplayName = data.externalAppDisplayName || ""
+    this.hasVerifiedBadge = data.hasVerifiedBadge || false
+  }
+
+  getProfileUrl() {
+    return "https://www.roblox.com/users/" + this.id + "/profile"
+  }
+
+  getAvatarUrl() {
+    return "https://www.roblox.com/headshot-thumbnail/image?userId=" + this.id + "&width=420&height=420&format=png"
+  }
+
+  getAccountAge() {
+    if (!this.created) return 0
+    let created = new Date(this.created)
+    let now = new Date()
+    let diff = now - created
+    return Math.floor(diff / (1000 * 60 * 60 * 24))
+  }
+}
+
+// ==================== Roblox Game ====================
+
+class RobloxGame {
+  id = 0
+  name = ""
+  description = ""
+  creator = null
+  visitorCount = 0
+  playing = 0
+  votes = { upVotes: 0, downVotes: 0 }
+  universeId = 0
+  placeId = 0
+  maxPlayers = 0
+  genre = ""
+  isFavorites = false
+  isGenresEnforced = false
+  isPaid = false
+  isRecording = false
+  isScriptable = false
+  totalUpVotes = 0
+  totalDownVotes = 0
+  creatorType = ""
+  creatorTargetId = 0
+  creatorName = ""
+  creatorHasVerifiedBadge = false
+  contentRatingTypeId = 0
+  minimumAllowedAge = 0
+  imageToken = ""
+
+  constructor(data) {
+    this.id = data.id
+    this.name = data.name
+    this.description = data.description || ""
+    this.creator = data.creator
+    this.visitorCount = data.visitorCount || 0
+    this.playing = data.playing || 0
+    this.votes = data.votes || { upVotes: 0, downVotes: 0 }
+    this.universeId = data.universeId || data.id
+    this.placeId = data.placeId || 0
+    this.maxPlayers = data.maxPlayers || 0
+    this.genre = data.genre || ""
+    this.isFavorites = data.isFavorites || false
+    this.isGenresEnforced = data.isGenresEnforced || false
+    this.isPaid = data.isPaid || false
+    this.isRecording = data.isRecording || false
+    this.isScriptable = data.isScriptable || false
+    this.totalUpVotes = data.totalUpVotes || 0
+    this.totalDownVotes = data.totalDownVotes || 0
+    this.creatorType = data.creatorType || ""
+    this.creatorTargetId = data.creatorTargetId || 0
+    this.creatorName = data.creatorName || ""
+    this.creatorHasVerifiedBadge = data.creatorHasVerifiedBadge || false
+    this.contentRatingTypeId = data.contentRatingTypeId || 0
+    this.minimumAllowedAge = data.minimumAllowedAge || 0
+    this.imageToken = data.imageToken || ""
+  }
+
+  getVotePercentage() {
+    let total = this.totalUpVotes + this.totalDownVotes
+    if (total === 0) return 0
+    return Math.round(this.totalUpVotes / total * 100)
+  }
+
+  getGameUrl() {
+    return "https://www.roblox.com/games/" + this.universeId
+  }
+
+  getPlaceUrl() {
+    return "https://www.roblox.com/games/" + this.placeId
+  }
+}
+
+// ==================== Roblox Server ====================
+
+class RobloxServer {
+  id = ""
+  playerTokens = []
+  playerCount = 0
+  playing = 0
+  maxPlayers = 0
+  fps = 0
+  ping = 0
+
+  constructor(data) {
+    this.id = data.id
+    this.playerTokens = data.playerTokens || []
+    this.playerCount = data.playerCount || 0
+    this.playing = data.playing || 0
+    this.maxPlayers = data.maxPlayers || 0
+    this.fps = data.fps || 0
+    this.ping = data.ping || 0
+  }
+
+  isFull() {
+    return this.playerCount >= this.maxPlayers
+  }
+
+  getFillPercentage() {
+    if (this.maxPlayers === 0) return 0
+    return Math.round(this.playerCount / this.maxPlayers * 100)
+  }
+}
+
+// ==================== Roblox Group ====================
+
+class RobloxGroup {
+  id = 0
+  name = ""
+  description = ""
+  owner = null
+  shout = null
+  memberCount = 0
+  isBuildersClubOnly = false
+  hasVerifiedBadge = false
+  role = null
+
+  constructor(data) {
+    this.id = data.group ? data.group.id : data.id
+    this.name = data.group ? data.group.name : data.name
+    this.description = data.group ? data.group.description : ""
+    this.owner = data.group ? data.group.owner : null
+    this.shout = data.group ? data.group.shout : null
+    this.memberCount = data.group ? data.group.memberCount : 0
+    this.isBuildersClubOnly = data.group ? data.group.isBuildersClubOnly : false
+    this.hasVerifiedBadge = data.group ? data.group.hasVerifiedBadge : false
+    this.role = data.role || null
+  }
+
+  getGroupUrl() {
+    return "https://www.roblox.com/groups/" + this.id
+  }
+}
+
+// ==================== Export All ====================
+
+export {
+  // Classes
+  RobloxClient,
+  RobloxUser,
+  RobloxGame,
+  RobloxServer,
+  RobloxGroup,
+
+  // Constants
+  ROBLOX_API,
+  ROBLOX_GAMES,
+  ROBLOX_CATALOG,
+  ROBLOX_THUMBNAILS,
+  ROBLOX_ASSETS,
+  ROBLOX_INVENTORY,
+  ROBLOX_TRADES,
+  ROBLOX_PRESENCE,
+  ROBLOX_GROUPS,
+  ROBLOX_ECONOMY,
+}

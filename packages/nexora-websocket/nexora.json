@@ -1,0 +1,14 @@
+{
+  "name": "nexora-websocket",
+  "version": "1.0.0",
+  "description": "WebSocket client and server for Nexora",
+  "main": "index.nx",
+  "author": "Nexora Contributors",
+  "license": "MIT",
+  "repository": "https://github.com/opennexora/nexora-websocket",
+  "keywords": ["websocket", "ws", "realtime", "socket", "broadcast"],
+  "dependencies": {},
+  "devDependencies": {
+    "nexora-test": "^1.0.0"
+  }
+}

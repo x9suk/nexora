@@ -1,0 +1,8 @@
+{
+  "name": "steam-nx",
+  "version": "1.0.0",
+  "description": "Steam API integration for Nexora",
+  "author": "Nexora Community",
+  "license": "MIT",
+  "keywords": ["steam", "gaming", "store", "friends"]
+}

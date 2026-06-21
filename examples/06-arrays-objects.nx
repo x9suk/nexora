@@ -1,0 +1,76 @@
+// Arrays and Objects in Nexora
+
+// Arrays
+let numbers = [1, 2, 3, 4, 5]
+print "Numbers: " + str(numbers)
+
+let fruits = ["apple", "banana", "cherry"]
+print "Fruits: " + str(fruits)
+
+// Array operations
+print "Length: " + str(len(numbers))
+print "First: " + str(numbers[0])
+print "Last: " + str(numbers[len(numbers) - 1])
+
+// Array methods
+let mixed = [3, 1, 4, 1, 5, 9, 2, 6]
+print "Original: " + str(mixed)
+
+// Adding elements
+let extended = push(mixed, 7)
+print "Extended: " + str(extended)
+
+// String operations
+let sentence = "Hello World"
+let words = split(sentence, " ")
+print "Words: " + str(words)
+let rejoined = join(words, "-")
+print "Rejoined: " + rejoined
+
+// Objects
+let person = {
+    name: "Ashish",
+    age: 20,
+    city: "Mumbai"
+}
+
+print "Person: " + str(person)
+print "Name: " + person.name
+print "Age: " + str(person.age)
+
+// Nested objects
+let company = {
+    name: "TechCorp",
+    employees: [
+        { name: "Alice", role: "Developer" },
+        { name: "Bob", role: "Designer" }
+    ]
+}
+
+print "Company: " + company.name
+print "First employee: " + company.employees[0].name
+
+// Object methods
+let calculator = {
+    add: func(a, b) => a + b,
+    subtract: func(a, b) => a - b,
+    multiply: func(a, b) => a * b
+}
+
+print "10 + 5 = " + str(calculator.add(10, 5))
+print "10 - 5 = " + str(calculator.subtract(10, 5))
+print "10 * 5 = " + str(calculator.multiply(10, 5))
+
+// Array of objects
+let users = [
+    { name: "Alice", age: 25, active: true },
+    { name: "Bob", age: 30, active: false },
+    { name: "Charlie", age: 35, active: true }
+]
+
+// Filter active users (simplified)
+for user in users {
+    if user.active {
+        print "Active user: " + user.name
+    }
+}

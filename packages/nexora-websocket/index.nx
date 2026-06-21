@@ -1,0 +1,382 @@
+/**
+ * nexora-websocket - WebSocket client and server for Nexora
+ */
+
+import http from "http";
+import crypto from "crypto";
+
+// Server
+
+class WebSocketServer {
+  constructor(options = {}) {
+    this.port = options.port || 8080;
+    this.host = options.host || "0.0.0.0";
+    this.clients = new Map();
+    this.channels = new Map();
+    this.onConnection = options.onConnection || (() => {});
+    this.onMessage = options.onMessage || (() => {});
+    this.onClose = options.onClose || (() => {});
+    this.onError = options.onError || (() => {});
+    this._server = null;
+  }
+
+  start() {
+    this._server = http.createServer((req, res) => {
+      if (req.headers.upgrade === "websocket") {
+        this._handleUpgrade(req, res);
+      } else {
+        res.writeHead(426, { "Content-Type": "text/plain" });
+        res.end("WebSocket upgrade required");
+      }
+    });
+
+    return new Promise((resolve) => {
+      this._server.listen(this.port, this.host, () => {
+        console.log(`WebSocket server listening on ${this.host}:${this.port}`);
+        resolve(this);
+      });
+    });
+  }
+
+  stop() {
+    return new Promise((resolve) => {
+      for (const [id, client] of this.clients) {
+        client.close();
+      }
+      this.clients.clear();
+      this.channels.clear();
+      if (this._server) {
+        this._server.close(resolve);
+      } else {
+        resolve();
+      }
+    });
+  }
+
+  _handleUpgrade(req, socket) {
+    const key = req.headers["sec-websocket-key"];
+    const acceptKey = crypto
+      .createHash("sha1")
+      .update(key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11")
+      .digest("base64");
+
+    const headers = [
+      "HTTP/1.1 101 Switching Protocols",
+      "Upgrade: websocket",
+      "Connection: Upgrade",
+      `Sec-WebSocket-Accept: ${acceptKey}`,
+      "",
+      "",
+    ].join("\r\n");
+
+    socket.write(headers);
+
+    const client = new WebSocketClient(socket, this);
+    this.clients.set(client.id, client);
+    this.onConnection(client);
+  }
+
+  broadcast(data, excludeId) {
+    for (const [id, client] of this.clients) {
+      if (id !== excludeId && client.readyState === 1) {
+        client.send(data);
+      }
+    }
+  }
+
+  to(channel) {
+    return {
+      broadcast: (data, excludeId) => {
+        const subs = this.channels.get(channel) || new Set();
+        for (const id of subs) {
+          if (id !== excludeId) {
+            const client = this.clients.get(id);
+            if (client && client.readyState === 1) {
+              client.send(data);
+            }
+          }
+        }
+      },
+    };
+  }
+
+  subscribe(clientId, channel) {
+    if (!this.channels.has(channel)) {
+      this.channels.set(channel, new Set());
+    }
+    this.channels.get(channel).add(clientId);
+  }
+
+  unsubscribe(clientId, channel) {
+    const subs = this.channels.get(channel);
+    if (subs) subs.delete(clientId);
+  }
+}
+
+class WebSocketClient {
+  constructor(socket, server) {
+    this.id = crypto.randomUUID();
+    this.socket = socket;
+    this.server = server;
+    this.readyState = 1;
+    this._buffer = Buffer.alloc(0);
+
+    socket.on("data", (data) => this._onData(data));
+    socket.on("close", () => this._onClose());
+    socket.on("error", (err) => this._onError(err));
+  }
+
+  send(data) {
+    if (this.readyState !== 1) return;
+    const payload = typeof data === "string" ? data : JSON.stringify(data);
+    const frame = this._encodeFrame(payload);
+    this.socket.write(frame);
+  }
+
+  close(code = 1000, reason = "") {
+    this.readyState = 3;
+    const frame = Buffer.alloc(2);
+    frame.writeUInt16BE(code, 0);
+    this.socket.end(frame);
+  }
+
+  subscribe(channel) {
+    this.server.subscribe(this.id, channel);
+  }
+
+  unsubscribe(channel) {
+    this.server.unsubscribe(this.id, channel);
+  }
+
+  _encodeFrame(data) {
+    const payload = Buffer.from(data);
+    let header;
+    if (payload.length < 126) {
+      header = Buffer.alloc(2);
+      header[0] = 0x81;
+      header[1] = payload.length;
+    } else if (payload.length < 65536) {
+      header = Buffer.alloc(4);
+      header[0] = 0x81;
+      header[1] = 126;
+      header.writeUInt16BE(payload.length, 2);
+    } else {
+      header = Buffer.alloc(10);
+      header[0] = 0x81;
+      header[1] = 127;
+      header.writeBigUInt64BE(BigInt(payload.length), 2);
+    }
+    return Buffer.concat([header, payload]);
+  }
+
+  _decodeFrame(buffer) {
+    if (buffer.length < 2) return null;
+
+    const firstByte = buffer[0];
+    const secondByte = buffer[1];
+    const opcode = firstByte & 0x0f;
+    const masked = (secondByte & 0x80) !== 0;
+    let payloadLength = secondByte & 0x7f;
+    let offset = 2;
+
+    if (payloadLength === 126) {
+      payloadLength = buffer.readUInt16BE(2);
+      offset = 4;
+    } else if (payloadLength === 127) {
+      payloadLength = Number(buffer.readBigUInt64BE(2));
+      offset = 10;
+    }
+
+    let mask;
+    if (masked) {
+      mask = buffer.slice(offset, offset + 4);
+      offset += 4;
+    }
+
+    const payload = buffer.slice(offset, offset + payloadLength);
+    if (masked) {
+      for (let i = 0; i < payload.length; i++) {
+        payload[i] ^= mask[i % 4];
+      }
+    }
+
+    return { opcode, payload, length: offset + payloadLength };
+  }
+
+  _onData(data) {
+    this._buffer = Buffer.concat([this._buffer, data]);
+
+    while (this._buffer.length >= 2) {
+      const frame = this._decodeFrame(this._buffer);
+      if (!frame) break;
+
+      this._buffer = this._buffer.slice(frame.length);
+
+      if (frame.opcode === 0x01) {
+        const message = frame.payload.toString("utf-8");
+        let parsed;
+        try {
+          parsed = JSON.parse(message);
+        } catch {
+          parsed = message;
+        }
+        this.server.onMessage(this, parsed);
+      } else if (frame.opcode === 0x08) {
+        this.close();
+      } else if (frame.opcode === 0x09) {
+        this.send(frame.payload);
+      }
+    }
+  }
+
+  _onClose() {
+    this.readyState = 3;
+    this.server.clients.delete(this.id);
+    this.server.onClose(this);
+  }
+
+  _onError(err) {
+    this.server.onError(this, err);
+  }
+}
+
+// Client
+
+class WebSocket {
+  constructor(url, options = {}) {
+    this.url = url;
+    this.readyState = 0;
+    this.onOpen = options.onOpen || (() => {});
+    this.onMessage = options.onMessage || (() => {});
+    this.onClose = options.onClose || (() => {});
+    this.onError = options.onError || (() => {});
+    this._handlers = {};
+    this._socket = null;
+  }
+
+  connect() {
+    const url = new URL(this.url);
+    const transport = url.protocol === "wss:" ? "https" : "http";
+
+    return new Promise((resolve, reject) => {
+      const req = http.request({
+        hostname: url.hostname,
+        port: url.port || (url.protocol === "wss:" ? 443 : 80),
+        path: url.pathname + url.search,
+        headers: {
+          Upgrade: "websocket",
+          Connection: "Upgrade",
+          "Sec-WebSocket-Key": crypto.randomBytes(16).toString("base64"),
+          "Sec-WebSocket-Version": "13",
+        },
+      });
+
+      req.on("upgrade", (res, socket) => {
+        this._socket = socket;
+        this.readyState = 1;
+
+        socket.on("data", (data) => this._onData(data));
+        socket.on("close", () => this._onClose());
+        socket.on("error", (err) => this.onError(err));
+
+        this.onOpen();
+        resolve(this);
+      });
+
+      req.on("error", reject);
+      req.end();
+    });
+  }
+
+  send(data) {
+    if (this.readyState !== 1 || !this._socket) return;
+    const payload = typeof data === "string" ? data : JSON.stringify(data);
+    const frame = this._encodeFrame(payload);
+    this._socket.write(frame);
+  }
+
+  close() {
+    this.readyState = 3;
+    if (this._socket) this._socket.end();
+  }
+
+  on(event, handler) {
+    if (!this._handlers[event]) this._handlers[event] = [];
+    this._handlers[event].push(handler);
+    return this;
+  }
+
+  _encodeFrame(data) {
+    const payload = Buffer.from(data);
+    let header;
+    if (payload.length < 126) {
+      header = Buffer.alloc(6);
+      header[0] = 0x81;
+      header[1] = 0x80 | payload.length;
+      crypto.randomBytes(4).copy(header, 2);
+    } else if (payload.length < 65536) {
+      header = Buffer.alloc(8);
+      header[0] = 0x81;
+      header[1] = 0x80 | 126;
+      header.writeUInt16BE(payload.length, 2);
+      crypto.randomBytes(4).copy(header, 4);
+    } else {
+      header = Buffer.alloc(14);
+      header[0] = 0x81;
+      header[1] = 0x80 | 127;
+      header.writeBigUInt64BE(BigInt(payload.length), 2);
+      crypto.randomBytes(4).copy(header, 10);
+    }
+
+    const mask = header.slice(header.length - 4);
+    const masked = Buffer.alloc(payload.length);
+    for (let i = 0; i < payload.length; i++) {
+      masked[i] = payload[i] ^ mask[i % 4];
+    }
+    return Buffer.concat([header, masked]);
+  }
+
+  _decodeFrame(buffer) {
+    if (buffer.length < 2) return null;
+    const secondByte = buffer[1];
+    let payloadLength = secondByte & 0x7f;
+    let offset = 2;
+    if (payloadLength === 126) {
+      payloadLength = buffer.readUInt16BE(2);
+      offset = 4;
+    } else if (payloadLength === 127) {
+      payloadLength = Number(buffer.readBigUInt64BE(2));
+      offset = 10;
+    }
+    const payload = buffer.slice(offset, offset + payloadLength);
+    return { opcode: buffer[0] & 0x0f, payload, length: offset + payloadLength };
+  }
+
+  _onData(data) {
+    const frame = this._decodeFrame(data);
+    if (!frame) return;
+    if (frame.opcode === 0x01) {
+      const message = frame.payload.toString("utf-8");
+      let parsed;
+      try { parsed = JSON.parse(message); } catch { parsed = message; }
+      this.onMessage(parsed);
+      (this._handlers.message || []).forEach((h) => h(parsed));
+    } else if (frame.opcode === 0x08) {
+      this._onClose();
+    }
+  }
+
+  _onClose() {
+    this.readyState = 3;
+    this.onClose();
+    (this._handlers.close || []).forEach((h) => h());
+  }
+}
+
+function connect(url, options) {
+  const ws = new WebSocket(url, options);
+  return ws.connect();
+}
+
+export { WebSocketServer, WebSocketClient, WebSocket, connect };
+export default { WebSocketServer, WebSocket, connect };

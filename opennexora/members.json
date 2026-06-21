@@ -1,0 +1,187 @@
+{
+  "foundation": "OpenNexora Foundation",
+  "foundingYear": 2026,
+  "lastUpdated": "2026-06-21",
+  "members": [
+    {
+      "id": "member-001",
+      "name": "Nexora Core Team",
+      "type": "founding",
+      "joinedDate": "2026-01-15",
+      "role": "Technical Steering Committee",
+      "representative": "Dr. Elena Rodriguez",
+      "email": "core@nexora.dev",
+      "website": "https://nexora.dev",
+      "contributions": [
+        "Core language development",
+        "Runtime implementation",
+        "Standard library"
+      ],
+      "status": "active"
+    },
+    {
+      "id": "member-002",
+      "name": "TechNova Inc.",
+      "type": "corporate",
+      "joinedDate": "2026-02-01",
+      "role": "Corporate Member",
+      "representative": "James Chen",
+      "email": "oss@technova.com",
+      "website": "https://technova.com",
+      "contributions": [
+        "Infrastructure support",
+        "Developer tools",
+        "Cloud services"
+      ],
+      "status": "active"
+    },
+    {
+      "id": "member-003",
+      "name": "CloudScale Systems",
+      "type": "corporate",
+      "joinedDate": "2026-02-15",
+      "role": "Corporate Member",
+      "representative": "Sarah Kim",
+      "email": "open-source@cloudscale.io",
+      "website": "https://cloudscale.io",
+      "contributions": [
+        "Package registry hosting",
+        "CI/CD infrastructure",
+        "Performance optimization"
+      ],
+      "status": "active"
+    },
+    {
+      "id": "member-004",
+      "name": "Dr. Marcus Johnson",
+      "type": "individual",
+      "joinedDate": "2026-01-20",
+      "role": "Board Director",
+      "representative": "Dr. Marcus Johnson",
+      "email": "marcus@nexora-consulting.com",
+      "website": "https://nexora-consulting.com",
+      "contributions": [
+        "Language design",
+        "Academic research",
+        "Conference speaking"
+      ],
+      "status": "active"
+    },
+    {
+      "id": "member-005",
+      "name": "OpenSource Collective",
+      "type": "nonprofit",
+      "joinedDate": "2026-03-01",
+      "role": "Community Member",
+      "representative": "Alex Thompson",
+      "email": "partnerships@opensourcecollective.org",
+      "website": "https://opensourcecollective.org",
+      "contributions": [
+        "Community outreach",
+        "Educational programs",
+        "Diversity initiatives"
+      ],
+      "status": "active"
+    },
+    {
+      "id": "member-006",
+      "name": "DevTools Pro",
+      "type": "corporate",
+      "joinedDate": "2026-03-15",
+      "role": "Corporate Member",
+      "representative": "Maria Garcia",
+      "email": "enterprise@devtoolspro.com",
+      "website": "https://devtoolspro.com",
+      "contributions": [
+        "IDE extensions",
+        "Debugging tools",
+        "Developer experience"
+      ],
+      "status": "active"
+    },
+    {
+      "id": "member-007",
+      "name": "Prof. Liu Wei",
+      "type": "individual",
+      "joinedDate": "2026-02-28",
+      "role": "Technical Advisor",
+      "representative": "Prof. Liu Wei",
+      "email": "liu.wei@university.edu",
+      "website": "https://university.edu/computer-science",
+      "contributions": [
+        "Research collaboration",
+        "Student mentorship",
+        "Academic publications"
+      ],
+      "status": "active"
+    },
+    {
+      "id": "member-008",
+      "name": "Nexora Community Forum",
+      "type": "community",
+      "joinedDate": "2026-01-10",
+      "role": "Community Member",
+      "representative": "David Park",
+      "email": "admin@nexoraforum.com",
+      "website": "https://nexoraforum.com",
+      "contributions": [
+        "Community support",
+        "Documentation translation",
+        "User advocacy"
+      ],
+      "status": "active"
+    }
+  ],
+  "membershipTiers": {
+    "founding": {
+      "description": "Original founding members",
+      "benefits": [
+        "Board representation",
+        "Voting rights",
+        "Logo placement",
+        "Priority support"
+      ],
+      "annualFee": "$0"
+    },
+    "corporate": {
+      "description": "Corporate and organization members",
+      "benefits": [
+        "TSC representation",
+        "Voting rights",
+        "Logo placement",
+        "Technical support"
+      ],
+      "annualFee": "$5,000 - $25,000"
+    },
+    "individual": {
+      "description": "Individual contributors",
+      "benefits": [
+        "Community access",
+        "Voting rights",
+        "Swag",
+        "Mentorship"
+      ],
+      "annualFee": "$0 - $100"
+    },
+    "nonprofit": {
+      "description": "Non-profit organizations",
+      "benefits": [
+        "Community representation",
+        "Voting rights",
+        "Educational resources"
+      ],
+      "annualFee": "$0 - $1,000"
+    },
+    "community": {
+      "description": "Community groups and forums",
+      "benefits": [
+        "Community support",
+        "Event sponsorship",
+        "Resource access"
+      ],
+      "annualFee": "$0"
+    }
+  },
+  "totalMembers": 8,
+  "nextReviewDate": "2026-12-31"
+}

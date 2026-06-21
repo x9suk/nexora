@@ -1,0 +1,366 @@
+/**
+ * lodash-nx - Utility library for Nexora
+ */
+
+// Array utilities
+
+export function map(arr, fn) {
+  const result = [];
+  for (let i = 0; i < arr.length; i++) {
+    result.push(fn(arr[i], i, arr));
+  }
+  return result;
+}
+
+export function filter(arr, fn) {
+  const result = [];
+  for (let i = 0; i < arr.length; i++) {
+    if (fn(arr[i], i, arr)) {
+      result.push(arr[i]);
+    }
+  }
+  return result;
+}
+
+export function reduce(arr, fn, initial) {
+  let acc = initial !== undefined ? initial : arr[0];
+  const start = initial !== undefined ? 0 : 1;
+  for (let i = start; i < arr.length; i++) {
+    acc = fn(acc, arr[i], i, arr);
+  }
+  return acc;
+}
+
+export function find(arr, fn) {
+  for (let i = 0; i < arr.length; i++) {
+    if (fn(arr[i], i, arr)) return arr[i];
+  }
+  return undefined;
+}
+
+export function every(arr, fn) {
+  for (let i = 0; i < arr.length; i++) {
+    if (!fn(arr[i], i, arr)) return false;
+  }
+  return true;
+}
+
+export function some(arr, fn) {
+  for (let i = 0; i < arr.length; i++) {
+    if (fn(arr[i], i, arr)) return true;
+  }
+  return false;
+}
+
+export function flatten(arr) {
+  const result = [];
+  for (let i = 0; i < arr.length; i++) {
+    if (Array.isArray(arr[i])) {
+      for (let j = 0; j < arr[i].length; j++) {
+        result.push(arr[i][j]);
+      }
+    } else {
+      result.push(arr[i]);
+    }
+  }
+  return result;
+}
+
+export function flatMap(arr, fn) {
+  return flatten(map(arr, fn));
+}
+
+export function unique(arr) {
+  const seen = new Set();
+  const result = [];
+  for (let i = 0; i < arr.length; i++) {
+    const val = arr[i];
+    if (!seen.has(val)) {
+      seen.add(val);
+      result.push(val);
+    }
+  }
+  return result;
+}
+
+export function chunk(arr, size) {
+  const result = [];
+  for (let i = 0; i < arr.length; i += size) {
+    result.push(arr.slice(i, i + size));
+  }
+  return result;
+}
+
+export function range(start, end, step = 1) {
+  const result = [];
+  if (end === undefined) {
+    end = start;
+    start = 0;
+  }
+  for (let i = start; i < end; i += step) {
+    result.push(i);
+  }
+  return result;
+}
+
+export function sortBy(arr, fn) {
+  return [...arr].sort((a, b) => {
+    const va = typeof fn === "function" ? fn(a) : a[fn];
+    const vb = typeof fn === "function" ? fn(b) : b[fn];
+    if (va < vb) return -1;
+    if (va > vb) return 1;
+    return 0;
+  });
+}
+
+export function groupBy(arr, fn) {
+  const result = {};
+  for (let i = 0; i < arr.length; i++) {
+    const key = typeof fn === "function" ? fn(arr[i]) : arr[i][fn];
+    if (!result[key]) result[key] = [];
+    result[key].push(arr[i]);
+  }
+  return result;
+}
+
+// Object utilities
+
+export function pick(obj, keys) {
+  const result = {};
+  for (let i = 0; i < keys.length; i++) {
+    if (keys[i] in obj) {
+      result[keys[i]] = obj[keys[i]];
+    }
+  }
+  return result;
+}
+
+export function omit(obj, keys) {
+  const result = { ...obj };
+  for (let i = 0; i < keys.length; i++) {
+    delete result[keys[i]];
+  }
+  return result;
+}
+
+export function clone(obj) {
+  if (obj === null || typeof obj !== "object") return obj;
+  if (Array.isArray(obj)) return obj.map((item) => clone(item));
+  const result = {};
+  const keys = Object.keys(obj);
+  for (let i = 0; i < keys.length; i++) {
+    result[keys[i]] = clone(obj[keys[i]]);
+  }
+  return result;
+}
+
+export function merge(target, ...sources) {
+  const result = { ...target };
+  for (let i = 0; i < sources.length; i++) {
+    const source = sources[i];
+    const keys = Object.keys(source);
+    for (let j = 0; j < keys.length; j++) {
+      const key = keys[j];
+      if (
+        result[key] &&
+        typeof result[key] === "object" &&
+        typeof source[key] === "object" &&
+        !Array.isArray(result[key]) &&
+        !Array.isArray(source[key])
+      ) {
+        result[key] = merge(result[key], source[key]);
+      } else {
+        result[key] = source[key];
+      }
+    }
+  }
+  return result;
+}
+
+export function keys(obj) {
+  return Object.keys(obj);
+}
+
+export function values(obj) {
+  return Object.values(obj);
+}
+
+export function entries(obj) {
+  return Object.entries(obj);
+}
+
+export function fromEntries(entries) {
+  const result = {};
+  for (let i = 0; i < entries.length; i++) {
+    result[entries[i][0]] = entries[i][1];
+  }
+  return result;
+}
+
+export function isEmpty(obj) {
+  if (obj === null || obj === undefined) return true;
+  if (typeof obj === "string" || Array.isArray(obj)) return obj.length === 0;
+  return Object.keys(obj).length === 0;
+}
+
+export function deepEqual(a, b) {
+  if (a === b) return true;
+  if (a === null || b === null) return false;
+  if (typeof a !== typeof b) return false;
+  if (typeof a !== "object") return a === b;
+  if (Array.isArray(a) !== Array.isArray(b)) return false;
+  if (Array.isArray(a)) {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+      if (!deepEqual(a[i], b[i])) return false;
+    }
+    return true;
+  }
+  const keysA = Object.keys(a);
+  const keysB = Object.keys(b);
+  if (keysA.length !== keysB.length) return false;
+  for (let i = 0; i < keysA.length; i++) {
+    if (!deepEqual(a[keysA[i]], b[keysA[i]])) return false;
+  }
+  return true;
+}
+
+// Function utilities
+
+export function debounce(fn, delay) {
+  let timer = null;
+  return function (...args) {
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
+export function throttle(fn, limit) {
+  let inThrottle = false;
+  return function (...args) {
+    if (!inThrottle) {
+      fn.apply(this, args);
+      inThrottle = true;
+      setTimeout(() => (inThrottle = false), limit);
+    }
+  };
+}
+
+export function memoize(fn) {
+  const cache = {};
+  return function (...args) {
+    const key = JSON.stringify(args);
+    if (key in cache) return cache[key];
+    const result = fn.apply(this, args);
+    cache[key] = result;
+    return result;
+  };
+}
+
+export function once(fn) {
+  let called = false;
+  let result;
+  return function (...args) {
+    if (!called) {
+      called = true;
+      result = fn.apply(this, args);
+    }
+    return result;
+  };
+}
+
+export function curry(fn) {
+  return function curried(...args) {
+    if (args.length >= fn.length) {
+      return fn.apply(this, args);
+    }
+    return function (...args2) {
+      return curried.apply(this, args.concat(args2));
+    };
+  };
+}
+
+export function pipe(...fns) {
+  return function (input) {
+    let result = input;
+    for (let i = 0; i < fns.length; i++) {
+      result = fns[i](result);
+    }
+    return result;
+  };
+}
+
+export function compose(...fns) {
+  return pipe(...fns.reverse());
+}
+
+// String utilities
+
+export function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+export function camelCase(str) {
+  return str
+    .replace(/[^a-zA-Z0-9]+(.)/g, (_, char) => char.toUpperCase())
+    .replace(/^[A-Z]/, (char) => char.toLowerCase());
+}
+
+export function kebabCase(str) {
+  return str
+    .replace(/([a-z])([A-Z])/g, "$1-$2")
+    .replace(/[^a-zA-Z0-9]+/g, "-")
+    .toLowerCase()
+    .replace(/^-|-$/g, "");
+}
+
+export function snakeCase(str) {
+  return str
+    .replace(/([a-z])([A-Z])/g, "$1_$2")
+    .replace(/[^a-zA-Z0-9]+/g, "_")
+    .toLowerCase()
+    .replace(/^_|_$/g, "");
+}
+
+export function truncate(str, length, suffix = "...") {
+  if (str.length <= length) return str;
+  return str.slice(0, length) + suffix;
+}
+
+export default {
+  map,
+  filter,
+  reduce,
+  find,
+  every,
+  some,
+  flatten,
+  flatMap,
+  unique,
+  chunk,
+  range,
+  sortBy,
+  groupBy,
+  pick,
+  omit,
+  clone,
+  merge,
+  keys,
+  values,
+  entries,
+  fromEntries,
+  isEmpty,
+  deepEqual,
+  debounce,
+  throttle,
+  memoize,
+  once,
+  curry,
+  pipe,
+  compose,
+  capitalize,
+  camelCase,
+  kebabCase,
+  snakeCase,
+  truncate,
+};

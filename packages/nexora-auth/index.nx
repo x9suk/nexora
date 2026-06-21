@@ -1,0 +1,307 @@
+/**
+ * nexora-auth - Authentication for Nexora
+ */
+
+import crypto from "crypto";
+
+// Password hashing
+
+function hashPassword(password, salt) {
+  salt = salt || crypto.randomBytes(16).toString("hex");
+  const hash = crypto.pbkdf2Sync(password, salt, 100000, 64, "sha512").toString("hex");
+  return { hash, salt };
+}
+
+function verifyPassword(password, storedHash, salt) {
+  const { hash } = hashPassword(password, salt);
+  return hash === storedHash;
+}
+
+// JWT (simplified implementation)
+
+function base64url(str) {
+  return Buffer.from(str)
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+}
+
+function base64urlDecode(str) {
+  str = str.replace(/-/g, "+").replace(/_/g, "/");
+  while (str.length % 4) str += "=";
+  return Buffer.from(str, "base64").toString("utf-8");
+}
+
+function sign(payload, secret, options = {}) {
+  const header = {
+    alg: "HS256",
+    typ: "JWT",
+  };
+
+  const now = Math.floor(Date.now() / 1000);
+  const tokenPayload = {
+    ...payload,
+    iat: payload.iat || now,
+    exp: payload.exp || now + (options.expiresIn || 3600),
+  };
+
+  const headerEncoded = base64url(JSON.stringify(header));
+  const payloadEncoded = base64url(JSON.stringify(tokenPayload));
+  const signature = crypto
+    .createHmac("sha256", secret)
+    .update(`${headerEncoded}.${payloadEncoded}`)
+    .digest("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+
+  return `${headerEncoded}.${payloadEncoded}.${signature}`;
+}
+
+function verify(token, secret) {
+  const parts = token.split(".");
+  if (parts.length !== 3) throw new Error("Invalid token format");
+
+  const [headerEncoded, payloadEncoded, signature] = parts;
+
+  const expectedSig = crypto
+    .createHmac("sha256", secret)
+    .update(`${headerEncoded}.${payloadEncoded}`)
+    .digest("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+
+  if (signature !== expectedSig) throw new Error("Invalid signature");
+
+  const payload = JSON.parse(base64urlDecode(payloadEncoded));
+
+  if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
+    throw new Error("Token expired");
+  }
+
+  return payload;
+}
+
+function decode(token) {
+  const parts = token.split(".");
+  if (parts.length !== 3) throw new Error("Invalid token format");
+  return JSON.parse(base64urlDecode(parts[1]));
+}
+
+// Session store
+
+class SessionStore {
+  constructor() {
+    this.sessions = new Map();
+  }
+
+  create(userId, data = {}) {
+    const id = crypto.randomBytes(32).toString("hex");
+    const session = {
+      id,
+      userId,
+      data,
+      createdAt: Date.now(),
+      expiresAt: Date.now() + 24 * 60 * 60 * 1000,
+    };
+    this.sessions.set(id, session);
+    return session;
+  }
+
+  get(id) {
+    const session = this.sessions.get(id);
+    if (!session) return null;
+    if (session.expiresAt < Date.now()) {
+      this.sessions.delete(id);
+      return null;
+    }
+    return session;
+  }
+
+  delete(id) {
+    this.sessions.delete(id);
+  }
+
+  destroy(userId) {
+    for (const [id, session] of this.sessions) {
+      if (session.userId === userId) {
+        this.sessions.delete(id);
+      }
+    }
+  }
+
+  clean() {
+    const now = Date.now();
+    for (const [id, session] of this.sessions) {
+      if (session.expiresAt < now) {
+        this.sessions.delete(id);
+      }
+    }
+  }
+}
+
+// Auth manager
+
+class AuthManager {
+  constructor(options = {}) {
+    this.secret = options.secret || crypto.randomBytes(32).toString("hex");
+    this.tokenExpiry = options.tokenExpiry || 3600;
+    this.refreshExpiry = options.refreshExpiry || 7 * 24 * 3600;
+    this.sessions = new SessionStore();
+    this.users = new Map();
+    this.hooks = {
+      beforeRegister: [],
+      afterRegister: [],
+      beforeLogin: [],
+      afterLogin: [],
+    };
+  }
+
+  on(event, fn) {
+    if (this.hooks[event]) this.hooks[event].push(fn);
+    return this;
+  }
+
+  async register(data) {
+    for (const hook of this.hooks.beforeRegister) {
+      await hook(data);
+    }
+
+    if (this.users.has(data.email)) {
+      throw new Error("Email already registered");
+    }
+
+    const { hash, salt } = hashPassword(data.password);
+    const user = {
+      id: crypto.randomUUID(),
+      email: data.email,
+      name: data.name || data.email.split("@")[0],
+      passwordHash: hash,
+      passwordSalt: salt,
+      role: data.role || "user",
+      createdAt: Date.now(),
+    };
+
+    this.users.set(user.id, user);
+
+    for (const hook of this.hooks.afterRegister) {
+      await hook(user);
+    }
+
+    const { passwordHash, passwordSalt, ...safeUser } = user;
+    return safeUser;
+  }
+
+  async login(email, password) {
+    const user = [...this.users.values()].find((u) => u.email === email);
+    if (!user) throw new Error("Invalid credentials");
+
+    for (const hook of this.hooks.beforeLogin) {
+      await hook(user);
+    }
+
+    if (!verifyPassword(password, user.passwordHash, user.passwordSalt)) {
+      throw new Error("Invalid credentials");
+    }
+
+    const token = this.generateToken(user);
+    const refreshToken = this.generateRefreshToken(user);
+    const session = this.sessions.create(user.id);
+
+    const result = {
+      user: { id: user.id, email: user.email, name: user.name, role: user.role },
+      token,
+      refreshToken,
+      sessionId: session.id,
+    };
+
+    for (const hook of this.hooks.afterLogin) {
+      await hook(result);
+    }
+
+    return result;
+  }
+
+  async logout(sessionId) {
+    this.sessions.delete(sessionId);
+  }
+
+  generateToken(user) {
+    return sign(
+      { sub: user.id, email: user.email, role: user.role },
+      this.secret,
+      { expiresIn: this.tokenExpiry }
+    );
+  }
+
+  generateRefreshToken(user) {
+    return sign(
+      { sub: user.id, type: "refresh" },
+      this.secret,
+      { expiresIn: this.refreshExpiry }
+    );
+  }
+
+  verifyToken(token) {
+    return verify(token, this.secret);
+  }
+
+  async refresh(refreshToken) {
+    const payload = verify(refreshToken, this.secret);
+    if (payload.type !== "refresh") throw new Error("Invalid refresh token");
+
+    const user = this.users.get(payload.sub);
+    if (!user) throw new Error("User not found");
+
+    return {
+      token: this.generateToken(user),
+      refreshToken: this.generateRefreshToken(user),
+    };
+  }
+
+  getUser(userId) {
+    const user = this.users.get(userId);
+    if (!user) return null;
+    const { passwordHash, passwordSalt, ...safeUser } = user;
+    return safeUser;
+  }
+
+  middleware() {
+    return (req, res, next) => {
+      const authHeader = req.headers?.authorization;
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ error: "No token provided" });
+      }
+
+      try {
+        const token = authHeader.slice(7);
+        const payload = this.verifyToken(token);
+        req.user = this.getUser(payload.sub);
+        if (!req.user) {
+          return res.status(401).json({ error: "User not found" });
+        }
+        next();
+      } catch (err) {
+        return res.status(401).json({ error: "Invalid token" });
+      }
+    };
+  }
+}
+
+function createAuth(options) {
+  return new AuthManager(options);
+}
+
+export {
+  AuthManager,
+  SessionStore,
+  createAuth,
+  hashPassword,
+  verifyPassword,
+  sign,
+  verify,
+  decode,
+};
+export default createAuth;

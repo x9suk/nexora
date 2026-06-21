@@ -1,0 +1,44 @@
+# Build artifacts
+target/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Cargo
+Cargo.lock
+
+# Nexora modules
+nexora_modules/
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Temp
+*.tmp
+*.temp
+
+# Packages
+*.zip
+*.tar.gz
+*.vsix
+
+# Registry database
+registry/database/
+registry/node_modules/
+
+# Test artifacts
+test_nexora.txt

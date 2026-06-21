@@ -1,0 +1,35 @@
+// Arrays and Objects in Nexora
+
+// Arrays
+let numbers = [1, 2, 3, 4, 5]
+print "Numbers: " + str(numbers)
+print "First: " + str(numbers[0])
+print "Third: " + str(numbers[2])
+
+// String in array
+let fruits = ["apple", "banana", "cherry"]
+print "Fruits: " + str(fruits)
+print "Second fruit: " + fruits[1]
+
+// Objects
+let person = {
+    name: "Ashish",
+    age: 20,
+    city: "Mumbai"
+}
+
+print ""
+print "Person:"
+print "Name: " + person.name
+print "Age: " + str(person.age)
+print "City: " + person.city
+
+// Nested
+let school = {
+    name: "Tech School",
+    students: ["Alice", "Bob", "Charlie"]
+}
+
+print ""
+print "School: " + school.name
+print "First student: " + school.students[0]

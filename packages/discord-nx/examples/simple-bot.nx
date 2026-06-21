@@ -1,0 +1,110 @@
+// discord-nx: Simple Bot Example
+// A basic Discord bot with message commands
+
+import { Client, Embed, Events, Permissions, Intents } from "../src/index.nx"
+
+// Create client with intents
+let client = new Client({
+  token: process.env.DISCORD_TOKEN,
+  intents: Intents.GUILDS | Intents.GUILD_MESSAGES | Intents.MESSAGE_CONTENT,
+})
+
+// Bot ready event
+client.on(Events.READY, (data) => {
+  console.log("Logged in as " + data.user.username)
+  console.log("Serving " + client.guilds.length + " guilds")
+})
+
+// Message create event
+client.on(Events.MESSAGE_CREATE, async (message) => {
+  // Ignore bot messages
+  if (message.author.bot) return
+
+  let content = message.content
+  let channelId = message.channel_id
+
+  // Ping command
+  if (content === "!ping") {
+    let embed = new Embed()
+      .setTitle("Pong!")
+      .setDescription("Latency: " + Date.now() + "ms")
+      .setColor(0x00ff00)
+      .setTimestamp()
+
+    await client.sendMessage(channelId, "", { embed: embed })
+  }
+
+  // Info command
+  if (content === "!info") {
+    let embed = new Embed()
+      .setTitle("Bot Info")
+      .setDescription("A Nexora Discord Bot")
+      .setColor(0x0099ff)
+      .addField("Guilds", "" + client.guilds.length, true)
+      .addField("Users", "" + client.user.id, true)
+      .setFooter("Powered by discord-nx")
+      .setTimestamp()
+
+    await client.sendMessage(channelId, "", { embed: embed })
+  }
+
+  // Help command
+  if (content === "!help") {
+    let embed = new Embed()
+      .setTitle("Commands")
+      .setDescription("Available commands:")
+      .setColor(0xff9900)
+      .addField("!ping", "Check bot latency")
+      .addField("!info", "Show bot information")
+      .addField("!help", "Show this help message")
+      .addField("!server", "Show server info")
+      .addField("!user", "Show user info")
+
+    await client.sendMessage(channelId, "", { embed: embed })
+  }
+
+  // Server info command
+  if (content === "!server") {
+    let guild = await client.getGuild(message.guild_id)
+
+    let embed = new Embed()
+      .setTitle(guild.name)
+      .setColor(0x9900ff)
+      .addField("ID", guild.id, true)
+      .addField("Owner", guild.owner_id, true)
+      .addField("Members", "" + guild.member_count, true)
+      .addField("Channels", "" + guild.channels.length, true)
+      .addField("Roles", "" + guild.roles.length, true)
+      .setTimestamp()
+
+    if (guild.icon) {
+      embed.setThumbnail("https://cdn.discordapp.com/icons/" + guild.id + "/" + guild.icon + ".png")
+    }
+
+    await client.sendMessage(channelId, "", { embed: embed })
+  }
+
+  // User info command
+  if (content === "!user") {
+    let user = message.author
+
+    let embed = new Embed()
+      .setTitle(user.username + "#" + user.discriminator)
+      .setColor(0x00ffff)
+      .addField("ID", user.id, true)
+      .addField("Bot", user.bot ? "Yes" : "No", true)
+      .setThumbnail("https://cdn.discordapp.com/avatars/" + user.id + "/" + user.avatar + ".png")
+      .setTimestamp()
+
+    await client.sendMessage(channelId, "", { embed: embed })
+  }
+
+  // Say command
+  if (content.startsWith("!say ")) {
+    let text = content.slice(5)
+    await client.sendMessage(channelId, text)
+  }
+})
+
+// Login
+await client.login()

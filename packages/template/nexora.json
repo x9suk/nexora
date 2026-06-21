@@ -1,0 +1,12 @@
+{
+  "name": "package-name",
+  "version": "1.0.0",
+  "description": "Package description",
+  "main": "index.nx",
+  "author": "Author Name",
+  "license": "MIT",
+  "repository": "https://github.com/opennexora/package-name",
+  "keywords": ["utility", "helper"],
+  "dependencies": {},
+  "devDependencies": {}
+}

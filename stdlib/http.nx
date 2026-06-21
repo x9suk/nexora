@@ -1,0 +1,140 @@
+// Nexora Standard Library - HTTP Module
+
+module http
+
+// HTTP Methods
+const GET = "GET"
+const POST = "POST"
+const PUT = "PUT"
+const DELETE = "DELETE"
+const PATCH = "PATCH"
+const HEAD = "HEAD"
+const OPTIONS = "OPTIONS"
+
+// Response class
+class Response {
+    init(status: Int, headers: Object, body: String) {
+        this.status = status
+        this.headers = headers
+        this.body = body
+    }
+
+    json() -> Object {
+        return parseJSON(this.body)
+    }
+
+    text() -> String {
+        return this.body
+    }
+
+    ok() -> Bool {
+        return this.status >= 200 && this.status < 300
+    }
+}
+
+// Request class
+class Request {
+    init(url: String, options: Object = {}) {
+        this.url = url
+        this.method = options.method || GET
+        this.headers = options.headers || {}
+        this.body = options.body || null
+    }
+
+    setHeader(name: String, value: String) {
+        this.headers[name] = value
+        return this
+    }
+
+    setBody(body: String) {
+        this.body = body
+        return this
+    }
+}
+
+// Make HTTP request
+func request(url: String, options: Object = {}) -> Response {
+    let method = options.method || GET
+    let headers = options.headers || {}
+    let body = options.body || null
+
+    return __internal_http_request(method, url, headers, body)
+}
+
+// GET request
+func get(url: String, headers: Object = {}) -> Response {
+    return request(url, { method: GET, headers: headers })
+}
+
+// POST request
+func post(url: String, body: String, headers: Object = {}) -> Response {
+    return request(url, { method: POST, body: body, headers: headers })
+}
+
+// PUT request
+func put(url: String, body: String, headers: Object = {}) -> Response {
+    return request(url, { method: PUT, body: body, headers: headers })
+}
+
+// DELETE request
+func delete(url: String, headers: Object = {}) -> Response {
+    return request(url, { method: DELETE, headers: headers })
+}
+
+// PATCH request
+func patch(url: String, body: String, headers: Object = {}) -> Response {
+    return request(url, { method: PATCH, body: body, headers: headers })
+}
+
+// Download file
+func download(url: String, path: String) -> Bool {
+    let response = get(url)
+    if response.ok() {
+        return fs.write(path, response.body)
+    }
+    return false
+}
+
+// Upload file
+func upload(url: String, path: String, fieldName: String = "file") -> Response {
+    let content = fs.read(path)
+    let filename = fs.basename(path)
+    
+    // Create multipart form data
+    let boundary = "----NexoraFormBoundary" + str(time.now())
+    let body = "--" + boundary + "\r\n"
+    body += "Content-Disposition: form-data; name=\"" + fieldName + "\"; filename=\"" + filename + "\"\r\n"
+    body += "Content-Type: application/octet-stream\r\n\r\n"
+    body += content + "\r\n"
+    body += "--" + boundary + "--\r\n"
+    
+    return post(url, body, {
+        "Content-Type": "multipart/form-data; boundary=" + boundary
+    })
+}
+
+// WebSocket connection
+func websocket(url: String, onMessage: func, onError: func = null) -> Object {
+    return __internal_http_websocket(url, onMessage, onError)
+}
+
+export {
+    GET,
+    POST,
+    PUT,
+    DELETE,
+    PATCH,
+    HEAD,
+    OPTIONS,
+    Response,
+    Request,
+    request,
+    get,
+    post,
+    put,
+    delete,
+    patch,
+    download,
+    upload,
+    websocket
+}

@@ -1,0 +1,14 @@
+{
+  "name": "lodash-nx",
+  "version": "1.0.0",
+  "description": "Utility library for Nexora - common operations for arrays, objects, functions",
+  "main": "index.nx",
+  "author": "Nexora Contributors",
+  "license": "MIT",
+  "repository": "https://github.com/opennexora/lodash-nx",
+  "keywords": ["utility", "helper", "array", "object", "functional"],
+  "dependencies": {},
+  "devDependencies": {
+    "nexora-test": "^1.0.0"
+  }
+}

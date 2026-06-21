@@ -1,0 +1,6 @@
+let d = "Monday"
+let x = match d {
+    "Monday" => "Weekday",
+    _ => "Other"
+}
+print x

@@ -1,0 +1,4 @@
+// 9. Assert
+assert(1 + 1 == 2, "Math is broken!")
+assert("hello" == "hello", "String equality broken!")
+print "All assertions passed!"

@@ -1,0 +1,68 @@
+// roblox-nx: Friend activity tracker
+// Shows friend activity and game stats
+
+import { RobloxClient } from "../src/index.nx"
+
+let client = new RobloxClient()
+
+async function trackActivity(userId) {
+  console.log("Loading user activity...")
+
+  // Get user info
+  let user = await client.getUser(userId)
+  console.log("User: " + user.name + " (" + user.displayName + ")")
+  console.log("Profile: " + user.getProfileUrl())
+  console.log("Account Age: " + user.getAccountAge() + " days")
+  console.log("")
+
+  // Get friends
+  let friends = await client.getFriends(userId)
+  console.log("Friends: " + friends.length)
+  console.log("")
+
+  // Get online friends
+  let onlineFriends = []
+  for (let friend of friends.slice(0, 20)) {
+    let presence = await client.getPresence(friend.id)
+    if (presence && presence.userPresenceType === 2) {
+      onlineFriends.push({
+        user: friend,
+        game: presence.lastKnownLocation,
+        placeId: presence.placeId,
+      })
+    }
+  }
+
+  console.log("=== Online Friends Playing ===")
+  if (onlineFriends.length === 0) {
+    console.log("No friends currently online")
+  } else {
+    for (let f of onlineFriends) {
+      console.log("- " + f.user.name + " in " + (f.game || "Unknown Game"))
+    }
+  }
+
+  console.log("")
+
+  // Get groups
+  let groups = await client.getGroups(userId)
+  console.log("=== Groups ===")
+  for (let group of groups.slice(0, 10)) {
+    console.log("- " + group.name + " (" + group.memberCount + " members)")
+    if (group.role) {
+      console.log("  Role: " + group.role.name)
+    }
+  }
+
+  console.log("")
+
+  // Get badges
+  let badges = await client.getBadges(userId, 20)
+  console.log("=== Recent Badges ===")
+  for (let badge of badges.slice(0, 10)) {
+    console.log("- " + badge.name)
+  }
+}
+
+// Replace with your user ID
+await trackActivity(123456789)
